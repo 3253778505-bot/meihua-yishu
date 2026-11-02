@@ -1,0 +1,3986 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>梅花易数 · 排盘与断卦</title>
+<meta name="description" content="依《增广校正梅花易数》制作的梅花易数排盘、断卦工具：时间起卦、数字起卦、字占、互卦变卦、体用旺衰、应期与卦例。">
+<meta name="theme-color" content="#982a20">
+<!-- 单文件离线版：CSS 与 JS 已内联，可直接复制到任何设备用浏览器打开 -->
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="梅花易数">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<style>
+/* ==========================================================
+   梅花易数 · 排盘断卦
+   纸墨朱砂，素朴为主
+   ========================================================== */
+
+:root {
+  --paper: #f3ede0;
+  --paper-2: #fbf7ec;
+  --paper-3: #f7f1e4;
+  --ink: #241f19;
+  --ink-2: #4b4237;
+  --ink-3: #7d7263;
+  --ink-4: #a79b88;
+  --red: #982a20;
+  --red-2: #b4473a;
+  --red-wash: rgba(152, 42, 32, .08);
+  --gold: #a9854b;
+  --green: #3d5c4d;
+  --line: rgba(60, 45, 30, .16);
+  --line-soft: rgba(60, 45, 30, .09);
+  --shadow: 0 1px 2px rgba(60, 45, 30, .04), 0 12px 34px -18px rgba(60, 45, 30, .35);
+  --radius: 3px;
+  --font-serif: "Songti SC", "STSong", "Noto Serif SC", "Source Han Serif SC", "SimSun", serif;
+  --font-kai: "Kaiti SC", "STKaiti", "KaiTi", "楷体", "Songti SC", serif;
+  --font-sans: "PingFang SC", "Microsoft YaHei", "Noto Sans SC", system-ui, sans-serif;
+}
+
+* { box-sizing: border-box; }
+
+[hidden] { display: none !important; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  margin: 0;
+  color: var(--ink);
+  font-family: var(--font-serif);
+  font-size: 16px;
+  line-height: 1.75;
+  background-color: var(--paper);
+  background-image:
+    radial-gradient(1100px 620px at 8% -12%, rgba(255, 255, 255, .72), transparent 62%),
+    radial-gradient(900px 520px at 108% 4%, rgba(169, 133, 75, .10), transparent 60%),
+    radial-gradient(700px 700px at 50% 120%, rgba(61, 92, 77, .06), transparent 60%),
+    repeating-linear-gradient(0deg, rgba(120, 100, 70, .028) 0 1px, transparent 1px 5px),
+    repeating-linear-gradient(90deg, rgba(120, 100, 70, .022) 0 1px, transparent 1px 5px);
+  -webkit-font-smoothing: antialiased;
+}
+
+::selection { background: rgba(152, 42, 32, .16); }
+
+button, input, select, textarea { font: inherit; color: inherit; }
+
+button { cursor: pointer; }
+
+.app { min-height: 100vh; display: flex; flex-direction: column; }
+
+/* ---------------- 顶栏 ---------------- */
+
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  gap: 28px;
+  padding: 10px 30px;
+  background: rgba(244, 238, 226, .82);
+  backdrop-filter: blur(14px) saturate(1.1);
+  border-bottom: 1px solid var(--line-soft);
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-decoration: none;
+  color: inherit;
+}
+
+.seal {
+  width: 42px;
+  height: 42px;
+  display: grid;
+  place-items: center;
+  background: var(--red);
+  color: #fdf8ee;
+  font-family: var(--font-kai);
+  font-size: 24px;
+  line-height: 1;
+  border-radius: 2px;
+  box-shadow: inset 0 0 0 2px rgba(253, 248, 238, .22), 0 2px 8px rgba(152, 42, 32, .24);
+  transform: rotate(-2.5deg);
+}
+
+.brand-text { display: flex; flex-direction: column; line-height: 1.25; }
+.brand-text strong {
+  font-family: var(--font-kai);
+  font-size: 22px;
+  font-weight: 600;
+  letter-spacing: .18em;
+}
+.brand-text em {
+  font-style: normal;
+  font-size: 10.5px;
+  letter-spacing: .22em;
+  color: var(--ink-3);
+}
+
+.main-nav { display: flex; gap: 4px; margin-left: 8px; }
+
+.main-nav button {
+  position: relative;
+  border: 0;
+  background: none;
+  padding: 8px 16px;
+  font-size: 15px;
+  letter-spacing: .14em;
+  color: var(--ink-2);
+  border-radius: 2px;
+  transition: color .2s, background .2s;
+}
+.main-nav button:hover { background: rgba(60, 45, 30, .05); }
+.main-nav button.active { color: var(--red); }
+.main-nav button.active::after {
+  content: "";
+  position: absolute;
+  left: 16px;
+  right: 16px;
+  bottom: 2px;
+  height: 2px;
+  background: var(--red);
+  border-radius: 2px;
+  opacity: .85;
+}
+
+.today {
+  margin-left: auto;
+  font-size: 12.5px;
+  letter-spacing: .06em;
+  color: var(--ink-3);
+  font-family: var(--font-sans);
+  text-align: right;
+  line-height: 1.5;
+}
+
+/* ---------------- 视图与布局 ---------------- */
+
+.view { display: none; flex: 1; }
+.view.active { display: block; animation: fade .35s ease both; }
+
+@keyframes fade { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+
+.layout {
+  display: grid;
+  grid-template-columns: 372px minmax(0, 1fr);
+  gap: 26px;
+  width: 100%;
+  max-width: 1460px;
+  margin: 0 auto;
+  padding: 26px 30px 70px;
+  align-items: start;
+}
+
+.sidebar { display: flex; flex-direction: column; gap: 18px; }
+
+.board { min-width: 0; }
+
+/* ---------------- 卡片 ---------------- */
+
+.card {
+  position: relative;
+  background:
+    linear-gradient(180deg, rgba(255, 253, 247, .96), rgba(250, 245, 234, .96));
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 22px;
+}
+
+.card::before {
+  content: "";
+  position: absolute;
+  inset: 5px;
+  border: 1px solid rgba(169, 133, 75, .14);
+  border-radius: 1px;
+  pointer-events: none;
+}
+
+.card-title {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.card-title h2 {
+  margin: 0;
+  font-family: var(--font-kai);
+  font-size: 19px;
+  font-weight: 600;
+  letter-spacing: .22em;
+}
+
+.card-note { font-size: 12px; color: var(--ink-4); letter-spacing: .1em; }
+
+.link-btn {
+  border: 0;
+  background: none;
+  color: var(--ink-3);
+  font-size: 12.5px;
+  letter-spacing: .08em;
+  padding: 2px 4px;
+  border-bottom: 1px solid transparent;
+}
+.link-btn:hover { color: var(--red); border-bottom-color: rgba(152, 42, 32, .4); }
+
+/* ---------------- 起卦表单 ---------------- */
+
+.segmented {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 4px;
+  padding: 4px;
+  background: rgba(60, 45, 30, .05);
+  border-radius: 3px;
+  margin-bottom: 16px;
+}
+
+.segmented button {
+  border: 0;
+  background: transparent;
+  padding: 7px 0;
+  font-size: 14px;
+  letter-spacing: .1em;
+  color: var(--ink-3);
+  border-radius: 2px;
+  transition: all .18s;
+}
+.segmented button:hover { color: var(--ink); }
+.segmented button.active {
+  background: var(--paper-2);
+  color: var(--red);
+  box-shadow: 0 1px 3px rgba(60, 45, 30, .12);
+}
+
+.pane { display: none; }
+.pane.active { display: block; animation: fade .25s ease both; }
+
+.field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 12px; }
+.field > span {
+  font-size: 12px;
+  letter-spacing: .14em;
+  color: var(--ink-3);
+}
+.field-row { display: flex; gap: 10px; }
+.field-row .field { flex: 1; min-width: 0; }
+.field.narrow { max-width: 92px; }
+
+input[type="text"], input[type="number"], input[type="datetime-local"], select {
+  width: 100%;
+  padding: 9px 10px;
+  border: 1px solid var(--line);
+  border-radius: 2px;
+  background: rgba(255, 253, 248, .8);
+  color: var(--ink);
+  font-size: 14.5px;
+  outline: none;
+  transition: border-color .18s, box-shadow .18s, background .18s;
+}
+input:focus, select:focus {
+  border-color: rgba(152, 42, 32, .5);
+  box-shadow: 0 0 0 3px rgba(152, 42, 32, .08);
+  background: #fffdf7;
+}
+input::placeholder { color: var(--ink-4); }
+
+select {
+  appearance: none;
+  background-image: linear-gradient(45deg, transparent 50%, var(--ink-3) 50%), linear-gradient(135deg, var(--ink-3) 50%, transparent 50%);
+  background-position: calc(100% - 16px) 55%, calc(100% - 11px) 55%;
+  background-size: 5px 5px, 5px 5px;
+  background-repeat: no-repeat;
+  padding-right: 28px;
+}
+
+.hint {
+  font-size: 12px;
+  line-height: 1.7;
+  color: var(--ink-4);
+  margin: -2px 0 12px;
+  letter-spacing: .02em;
+}
+
+.check {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12.5px;
+  color: var(--ink-3);
+  margin: 2px 0 4px;
+  user-select: none;
+}
+.check input { accent-color: var(--red); width: 14px; height: 14px; }
+
+.lunar-fallback {
+  margin: 8px 0 10px;
+  border: 1px dashed var(--line);
+  border-radius: 2px;
+  padding: 8px 12px 10px;
+  background: rgba(60, 45, 30, .018);
+}
+.lunar-fallback summary {
+  cursor: pointer;
+  font-size: 12.5px;
+  color: var(--ink-3);
+  letter-spacing: .06em;
+  outline: none;
+  list-style: none;
+}
+.lunar-fallback summary::-webkit-details-marker { display: none; }
+.lunar-fallback summary::before { content: "＋"; margin-right: 6px; color: var(--ink-4); }
+.lunar-fallback[open] summary::before { content: "－"; }
+.lunar-fallback summary:hover { color: var(--red); }
+.lunar-fallback[open] summary { margin-bottom: 10px; }
+.lunar-fallback .field { margin-bottom: 8px; }
+.lunar-fallback .check { margin-top: 2px; }
+
+.divider { height: 1px; background: var(--line-soft); margin: 16px 0; }
+
+.cast-actions { display: flex; gap: 10px; margin-top: 14px; }
+
+.btn {
+  border: 1px solid var(--line);
+  background: var(--paper-2);
+  padding: 9px 16px;
+  border-radius: 2px;
+  font-size: 14px;
+  letter-spacing: .12em;
+  color: var(--ink-2);
+  transition: all .18s;
+}
+.btn:hover { border-color: rgba(152, 42, 32, .4); color: var(--red); transform: translateY(-1px); }
+.btn:active { transform: none; }
+
+.btn.primary {
+  flex: 1;
+  background: var(--red);
+  border-color: var(--red);
+  color: #fdf8ee;
+  box-shadow: 0 6px 18px -10px rgba(152, 42, 32, .9);
+  letter-spacing: .3em;
+  font-size: 15px;
+}
+.btn.primary:hover { background: #a73328; color: #fff; }
+.btn.ghost { background: transparent; }
+.btn.tiny { padding: 5px 10px; font-size: 12px; letter-spacing: .06em; }
+
+.error {
+  margin-top: 12px;
+  padding: 8px 10px;
+  border-left: 3px solid var(--red);
+  background: var(--red-wash);
+  color: var(--red);
+  font-size: 13px;
+  border-radius: 2px;
+}
+
+/* ---------------- 记录 ---------------- */
+
+.history-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 2px; max-height: 260px; overflow: auto; }
+.history-list li.empty-line { color: var(--ink-4); font-size: 13px; padding: 6px 2px; }
+.history-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 8px;
+  border-radius: 2px;
+  cursor: pointer;
+  transition: background .15s;
+}
+.history-item:hover { background: rgba(60, 45, 30, .05); }
+.history-item .hi-name { font-family: var(--font-kai); font-size: 15.5px; letter-spacing: .08em; }
+.history-item .hi-meta { margin-left: auto; font-size: 11.5px; color: var(--ink-4); font-family: var(--font-sans); }
+.history-item .hi-del { border: 0; background: none; color: var(--ink-4); font-size: 13px; padding: 0 2px; }
+.history-item .hi-del:hover { color: var(--red); }
+
+/* ---------------- 空状态 ---------------- */
+
+.empty-state {
+  min-height: 66vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 40px 20px;
+  color: var(--ink-2);
+}
+
+.empty-hex {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 150px;
+  margin-bottom: 30px;
+  opacity: .5;
+}
+.empty-hex i {
+  height: 9px;
+  background: var(--ink-3);
+  border-radius: 1px;
+  animation: breathe 4.5s ease-in-out infinite;
+}
+.empty-hex i:nth-child(2) { background: transparent; position: relative; }
+.empty-hex i:nth-child(2)::before,
+.empty-hex i:nth-child(2)::after {
+  content: ""; position: absolute; top: 0; width: 42%; height: 9px; background: var(--ink-3);
+}
+.empty-hex i:nth-child(2)::before { left: 0; }
+.empty-hex i:nth-child(2)::after { right: 0; }
+.empty-hex i:nth-child(1) { animation-delay: .1s; }
+.empty-hex i:nth-child(3) { animation-delay: .3s; }
+.empty-hex i:nth-child(5) { animation-delay: .5s; }
+.empty-hex i:nth-child(6) { animation-delay: .7s; }
+
+@keyframes breathe { 0%, 100% { opacity: .55; } 50% { opacity: 1; } }
+
+.empty-state h2 {
+  margin: 0 0 8px;
+  font-family: var(--font-kai);
+  font-size: 26px;
+  font-weight: 500;
+  letter-spacing: .3em;
+  text-indent: .3em;
+}
+.empty-state p { margin: 0 0 26px; color: var(--ink-3); letter-spacing: .08em; font-size: 14.5px; }
+.empty-tips { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
+.empty-tips span {
+  font-size: 12px;
+  color: var(--ink-3);
+  border: 1px solid var(--line);
+  padding: 3px 10px;
+  border-radius: 999px;
+  letter-spacing: .12em;
+}
+
+/* ---------------- 卦盘 ---------------- */
+
+.result { display: flex; flex-direction: column; gap: 20px; }
+.result > .card { animation: rise .5s cubic-bezier(.2, .8, .2, 1) both; }
+.result > .card:nth-child(2) { animation-delay: .06s; }
+.result > .card:nth-child(3) { animation-delay: .12s; }
+
+@keyframes rise { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+
+.chart-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; }
+
+.eyebrow {
+  font-size: 11.5px;
+  letter-spacing: .24em;
+  color: var(--ink-4);
+  margin-bottom: 4px;
+  font-family: var(--font-sans);
+}
+
+.chart-head h2 {
+  margin: 0;
+  font-family: var(--font-kai);
+  font-size: 38px;
+  font-weight: 500;
+  letter-spacing: .14em;
+  line-height: 1.2;
+}
+
+.chart-sub { margin-top: 6px; color: var(--ink-3); font-size: 13.5px; letter-spacing: .06em; }
+
+.chart-actions { display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
+
+.meta-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 1px;
+  margin: 18px 0 4px;
+  background: var(--line-soft);
+  border: 1px solid var(--line-soft);
+  border-radius: 2px;
+  overflow: hidden;
+}
+.meta-item { background: rgba(253, 250, 243, .9); padding: 9px 12px; }
+.meta-item dt { font-size: 11px; color: var(--ink-4); letter-spacing: .16em; margin: 0 0 2px; }
+.meta-item dd { margin: 0; font-size: 13.5px; color: var(--ink-2); letter-spacing: .02em; }
+.meta-item dd b { color: var(--red); font-weight: 600; }
+
+.meta-note {
+  margin: -4px 0 4px;
+  padding: 8px 12px;
+  border: 1px solid var(--line-soft);
+  border-top: 0;
+  border-radius: 0 0 2px 2px;
+  background: rgba(253, 250, 243, .5);
+  font-size: 12.5px;
+  line-height: 1.75;
+  color: var(--ink-3);
+  letter-spacing: .01em;
+}
+.meta-note b { color: var(--ink-4); font-weight: 400; letter-spacing: .12em; margin-right: 6px; }
+
+.hex-row {
+  display: grid;
+  grid-template-columns: 1fr 26px 1fr 26px 1fr;
+  gap: 6px;
+  align-items: stretch;
+  margin: 18px 0 6px;
+}
+
+.hex-arrow {
+  display: grid;
+  place-items: center;
+  color: var(--ink-4);
+  font-size: 18px;
+  font-family: var(--font-sans);
+  padding-top: 30px;
+}
+
+.hex-block {
+  border: 1px solid var(--line-soft);
+  border-radius: 2px;
+  padding: 12px 10px 10px;
+  background: rgba(255, 253, 247, .55);
+  display: flex;
+  flex-direction: column;
+}
+
+.hex-head { text-align: center; margin-bottom: 10px; }
+.hex-kind {
+  display: inline-block;
+  font-size: 10.5px;
+  letter-spacing: .2em;
+  color: var(--ink-4);
+  border: 1px solid var(--line-soft);
+  border-radius: 999px;
+  padding: 0 8px;
+  margin-bottom: 4px;
+}
+.hex-name {
+  display: block;
+  font-family: var(--font-kai);
+  font-size: 21px;
+  letter-spacing: .1em;
+  line-height: 1.3;
+}
+.hex-sym { display: block; font-size: 13px; color: var(--ink-4); letter-spacing: .2em; }
+
+.hex-body { display: flex; flex-direction: column; justify-content: center; gap: 13px; flex: 1; margin: 6px 0 10px; }
+
+.tri-group { display: grid; grid-template-columns: 40px 1fr; gap: 8px; align-items: center; }
+
+.tri-tag {
+  writing-mode: horizontal-tb;
+  align-self: center;
+  justify-self: center;
+  display: grid;
+  place-items: center;
+  width: auto;
+  min-width: 26px;
+  height: 20px;
+  padding: 0 6px;
+  font-family: var(--font-kai);
+  font-size: 10.5px;
+  letter-spacing: 0;
+  line-height: 1;
+  text-align: center;
+  white-space: nowrap;
+  border-radius: 2px;
+  color: #fdf8ee;
+  background: var(--ink-3);
+}
+.tri-tag.ti { background: var(--red); }
+.tri-tag.yong { background: var(--green); }
+.tri-tag.bian { background: var(--gold); }
+.tri-tag.hu { background: var(--ink-4); }
+.tri-tag.plain { background: transparent; color: var(--ink-4); border: 1px dashed var(--line); }
+
+.tri-lines { display: flex; flex-direction: column; justify-content: center; gap: 7px; }
+
+.line-row { display: grid; grid-template-columns: 1fr 14px; align-items: center; gap: 5px; height: 11px; }
+.line { display: flex; gap: 15%; height: 9px; }
+.line i { background: var(--ink); border-radius: .5px; flex: 1; }
+.line-row.moving .line i { background: var(--red); box-shadow: 0 0 0 1px rgba(152, 42, 32, .14); }
+.moving-mark {
+  width: 14px;
+  text-align: center;
+  font-size: 11.5px;
+  line-height: 1;
+  color: var(--red);
+  font-family: var(--font-sans);
+}
+
+.hex-foot {
+  margin-top: auto;
+  padding-top: 8px;
+  border-top: 1px dashed var(--line-soft);
+  font-size: 11.5px;
+  color: var(--ink-3);
+  text-align: center;
+  letter-spacing: .04em;
+  line-height: 1.5;
+}
+
+.tiyong {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 6px;
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid var(--line-soft);
+}
+
+.chip {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 4px;
+  padding: 5px 10px;
+  border: 1px solid var(--line);
+  border-radius: 2px;
+  background: rgba(255, 253, 247, .7);
+  font-size: 12.5px;
+  letter-spacing: .02em;
+}
+.chip em {
+  font-style: normal;
+  font-size: 11px;
+  color: var(--ink-3);
+  letter-spacing: .1em;
+  margin-right: 1px;
+}
+.chip b { font-family: var(--font-kai); font-size: 15px; font-weight: 600; line-height: 1.1; }
+.chip i { font-style: normal; font-size: 11px; color: var(--ink-3); }
+.chip .dot { color: var(--ink-4); margin: 0 2px; font-size: 10px; }
+.chip .rel { font-size: 11px; color: var(--ink-3); margin-left: 4px; }
+.chip b.meaning { font-size: 13.5px; letter-spacing: .06em; }
+.chip.ti { border-color: rgba(152, 42, 32, .35); background: rgba(152, 42, 32, .05); }
+.chip.yong { border-color: rgba(61, 92, 77, .32); background: rgba(61, 92, 77, .05); }
+.chip.good b { color: var(--green); }
+.chip.bad b { color: var(--red); }
+
+/* ---------------- 断语 ---------------- */
+
+.verdict-head { display: flex; gap: 20px; align-items: center; padding-bottom: 18px; border-bottom: 1px solid var(--line-soft); }
+
+.grade-badge {
+  flex: 0 0 auto;
+  width: 86px;
+  height: 86px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border: 1.5px solid var(--gold);
+  border-radius: 50%;
+  color: var(--ink);
+  background: radial-gradient(circle at 50% 30%, rgba(255, 255, 255, .9), rgba(247, 241, 228, .6));
+  box-shadow: inset 0 0 0 4px rgba(169, 133, 75, .10);
+}
+.grade-badge strong { font-family: var(--font-kai); font-size: 30px; line-height: 1; letter-spacing: .06em; }
+.grade-badge span { font-size: 10px; color: var(--ink-4); letter-spacing: .22em; margin-top: 4px; }
+.grade-badge[data-grade="daji"] { border-color: var(--red); color: var(--red); }
+.grade-badge[data-grade="ji"], .grade-badge[data-grade="xiaoji"] { border-color: var(--green); color: var(--green); }
+.grade-badge[data-grade="ping"] { border-color: var(--ink-4); color: var(--ink-2); }
+.grade-badge[data-grade="xiong"], .grade-badge[data-grade="daxiong"], .grade-badge[data-grade="xiaoxiong"] { border-color: #7b3a30; color: #7b3a30; }
+
+.verdict-summary { flex: 1; min-width: 0; }
+.verdict-line { margin: 0 0 12px; font-size: 15.5px; line-height: 1.8; color: var(--ink-2); }
+.verdict-line b { color: var(--red); font-weight: 600; }
+
+.meter { height: 6px; border-radius: 4px; background: linear-gradient(90deg, rgba(123, 58, 48, .18), rgba(169, 133, 75, .22), rgba(61, 92, 77, .22)); overflow: hidden; }
+.meter span { display: block; height: 100%; background: linear-gradient(90deg, #7b3a30, var(--gold), var(--green)); border-radius: 4px; transition: width .7s cubic-bezier(.2, .8, .2, 1); }
+.meter-scale { display: flex; justify-content: space-between; font-size: 10px; color: var(--ink-4); letter-spacing: .2em; margin-top: 4px; }
+
+.sections { display: flex; flex-direction: column; }
+
+.sec { padding: 18px 0; border-bottom: 1px dashed var(--line-soft); }
+.sec:last-child { border-bottom: 0; padding-bottom: 4px; }
+
+.sec h3 {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin: 0 0 8px;
+  font-family: var(--font-kai);
+  font-size: 16.5px;
+  font-weight: 600;
+  letter-spacing: .18em;
+  color: var(--ink);
+}
+.sec h3::before { content: ""; width: 3px; height: 15px; background: var(--red); border-radius: 1px; }
+.sec p { margin: 0; font-size: 14.5px; line-height: 1.95; color: var(--ink-2); text-align: justify; }
+.sec p + p { margin-top: 6px; }
+
+.sec.ying p { color: var(--ink-2); }
+.sec.ying .num {
+  font-family: var(--font-sans);
+  color: var(--red);
+  font-weight: 600;
+}
+
+.advice-block {
+  margin-top: 18px;
+  padding: 16px 18px;
+  background: rgba(61, 92, 77, .045);
+  border: 1px solid rgba(61, 92, 77, .16);
+  border-left: 3px solid var(--green);
+  border-radius: 2px;
+}
+.advice-block h3 {
+  margin: 0 0 8px;
+  font-family: var(--font-kai);
+  font-size: 15.5px;
+  letter-spacing: .2em;
+  font-weight: 600;
+}
+.advice-block ul { margin: 0; padding-left: 1.1em; }
+.advice-block li { font-size: 13.8px; line-height: 1.85; color: var(--ink-2); margin-bottom: 3px; }
+
+/* ---------------- 详情 ---------------- */
+
+.tabbar { display: flex; gap: 2px; border-bottom: 1px solid var(--line); margin: -4px -4px 16px; padding: 0 4px; flex-wrap: wrap; }
+.tabbar button {
+  border: 0;
+  background: none;
+  padding: 9px 14px;
+  font-size: 13.5px;
+  letter-spacing: .12em;
+  color: var(--ink-3);
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  transition: color .18s, border-color .18s;
+}
+.tabbar button:hover { color: var(--ink); }
+.tabbar button.active { color: var(--red); border-bottom-color: var(--red); }
+
+.detail-body { font-size: 14px; color: var(--ink-2); }
+
+.gua-ci { display: flex; flex-direction: column; gap: 14px; }
+.gua-ci .ci-row { display: grid; grid-template-columns: 62px 1fr; gap: 12px; align-items: start; }
+.gua-ci dt { font-family: var(--font-kai); color: var(--ink-3); letter-spacing: .1em; font-size: 13px; }
+.gua-ci dd { margin: 0; line-height: 1.9; }
+.gua-ci .quote { font-family: var(--font-kai); font-size: 16px; color: var(--ink); letter-spacing: .04em; }
+
+.xiang-tabs { display: flex; gap: 6px; margin-bottom: 12px; flex-wrap: wrap; }
+.xiang-tabs button {
+  border: 1px solid var(--line);
+  background: transparent;
+  border-radius: 999px;
+  padding: 3px 12px;
+  font-size: 12.5px;
+  letter-spacing: .08em;
+  color: var(--ink-3);
+}
+.xiang-tabs button.active { background: var(--red); border-color: var(--red); color: #fdf8ee; }
+
+.xiang-table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+.xiang-table th, .xiang-table td { text-align: left; padding: 7px 10px; border-bottom: 1px solid var(--line-soft); vertical-align: top; }
+.xiang-table th { width: 84px; color: var(--ink-3); font-weight: 400; letter-spacing: .1em; font-family: var(--font-kai); }
+.xiang-table tr:last-child td, .xiang-table tr:last-child th { border-bottom: 0; }
+
+.cuo-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; }
+.cuo-item { border: 1px solid var(--line-soft); border-radius: 2px; padding: 12px; text-align: center; background: rgba(255, 253, 247, .6); }
+.cuo-item span { display: block; font-size: 11px; letter-spacing: .18em; color: var(--ink-4); margin-bottom: 4px; }
+.cuo-item strong { font-family: var(--font-kai); font-size: 18px; font-weight: 500; letter-spacing: .1em; }
+.cuo-item em { display: block; font-style: normal; font-size: 12px; color: var(--ink-3); margin-top: 4px; }
+
+.rule-list { display: flex; flex-direction: column; gap: 12px; }
+.rule-list .rule { padding-left: 12px; border-left: 2px solid rgba(169, 133, 75, .35); }
+.rule-list .rule b { font-family: var(--font-kai); letter-spacing: .1em; font-weight: 600; }
+.rule-list .rule p { margin: 2px 0 0; font-size: 13.2px; color: var(--ink-3); line-height: 1.8; }
+
+/* ---------------- 卦例 ---------------- */
+
+.page-head { max-width: 1100px; margin: 0 auto; padding: 46px 30px 10px; }
+.page-head h1 {
+  margin: 0 0 8px;
+  font-family: var(--font-kai);
+  font-size: 34px;
+  font-weight: 500;
+  letter-spacing: .4em;
+  text-indent: .4em;
+}
+.page-head p { margin: 0; color: var(--ink-3); font-size: 14px; letter-spacing: .06em; line-height: 1.9; }
+
+.cases-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 26px 30px 70px;
+}
+
+.case-card { display: flex; flex-direction: column; gap: 12px; }
+.case-card h2 {
+  margin: 0;
+  font-family: var(--font-kai);
+  font-size: 22px;
+  font-weight: 500;
+  letter-spacing: .16em;
+}
+.case-card .case-sub { font-size: 12.5px; color: var(--ink-4); letter-spacing: .1em; margin-top: -6px; }
+.case-cast { display: flex; flex-wrap: wrap; gap: 6px; }
+.case-cast span {
+  font-size: 11.5px;
+  border: 1px solid var(--line-soft);
+  background: rgba(60, 45, 30, .03);
+  padding: 2px 8px;
+  border-radius: 2px;
+  color: var(--ink-3);
+}
+.case-card details { font-size: 13.5px; }
+.case-card summary { cursor: pointer; color: var(--ink-3); font-size: 12.5px; letter-spacing: .12em; outline: none; }
+.case-card summary:hover { color: var(--red); }
+.case-card details p { margin: 8px 0 0; line-height: 1.95; text-align: justify; color: var(--ink-2); }
+.case-verdict {
+  font-family: var(--font-kai);
+  font-size: 15px;
+  line-height: 1.85;
+  color: var(--red);
+  padding: 10px 12px;
+  background: var(--red-wash);
+  border-left: 2px solid var(--red);
+}
+.case-card ul { margin: 0; padding-left: 1.1em; }
+.case-card li { font-size: 13px; line-height: 1.8; color: var(--ink-3); }
+.case-foot { display: flex; justify-content: space-between; align-items: center; margin-top: auto; padding-top: 6px; border-top: 1px dashed var(--line-soft); }
+.case-foot .lesson { font-size: 12px; color: var(--ink-4); max-width: 70%; line-height: 1.6; }
+
+/* ---------------- 断诀 ---------------- */
+
+.study-wrap { max-width: 1080px; margin: 0 auto; padding: 20px 30px 80px; display: flex; flex-direction: column; gap: 20px; }
+
+.study-sec h2 {
+  margin: 0 0 4px;
+  font-family: var(--font-kai);
+  font-size: 24px;
+  font-weight: 500;
+  letter-spacing: .12em;
+}
+.study-sec .lead { color: var(--ink-3); font-size: 13.5px; margin: 0 0 16px; letter-spacing: .04em; }
+
+.quote-block {
+  padding: 14px 16px;
+  background: rgba(169, 133, 75, .055);
+  border-left: 3px solid rgba(169, 133, 75, .55);
+  font-family: var(--font-kai);
+  font-size: 15.5px;
+  line-height: 2;
+  letter-spacing: .04em;
+  color: var(--ink);
+  border-radius: 2px;
+}
+.quote-block + .quote-block { margin-top: 10px; }
+.quote-block small { display: block; font-family: var(--font-sans); font-size: 11px; color: var(--ink-4); letter-spacing: .18em; margin-bottom: 4px; }
+
+.grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 14px; }
+.grid-2 .box { border: 1px solid var(--line-soft); border-radius: 2px; padding: 14px 16px; background: rgba(255, 253, 247, .55); }
+.grid-2 .box h3 { margin: 0 0 6px; font-family: var(--font-kai); font-size: 16px; letter-spacing: .14em; font-weight: 600; }
+.grid-2 .box p { margin: 0; font-size: 13.5px; line-height: 1.9; color: var(--ink-3); }
+
+.table-wrap { overflow-x: auto; border: 1px solid var(--line-soft); border-radius: 2px; }
+table.data { width: 100%; border-collapse: collapse; font-size: 13.2px; background: rgba(255, 253, 247, .55); }
+table.data th, table.data td { padding: 8px 10px; border-bottom: 1px solid var(--line-soft); text-align: left; vertical-align: top; }
+table.data thead th { background: rgba(60, 45, 30, .04); font-weight: 500; color: var(--ink-2); letter-spacing: .1em; white-space: nowrap; }
+table.data tbody tr:hover { background: rgba(169, 133, 75, .05); }
+table.data td.name { font-family: var(--font-kai); font-size: 14.5px; white-space: nowrap; letter-spacing: .06em; }
+
+.pill-list { display: flex; flex-wrap: wrap; gap: 6px; }
+.pill { font-size: 12.5px; border: 1px solid var(--line); border-radius: 999px; padding: 2px 10px; color: var(--ink-2); }
+.pill.red { color: var(--red); border-color: rgba(152, 42, 32, .3); }
+
+/* ---------------- 说明 ---------------- */
+
+.about-wrap { max-width: 900px; margin: 0 auto; padding: 20px 30px 80px; display: flex; flex-direction: column; gap: 18px; }
+
+.prose h2 { margin: 0 0 10px; font-family: var(--font-kai); font-size: 21px; font-weight: 500; letter-spacing: .2em; }
+.prose p, .prose li { font-size: 14.2px; line-height: 2; color: var(--ink-2); }
+.prose ol, .prose ul { padding-left: 1.3em; margin: 0; }
+.prose li + li { margin-top: 4px; }
+.prose b { color: var(--red); font-weight: 600; }
+
+kbd {
+  font-family: var(--font-sans);
+  font-size: 11.5px;
+  border: 1px solid var(--line);
+  border-bottom-width: 2px;
+  border-radius: 3px;
+  padding: 1px 6px;
+  background: rgba(255, 253, 247, .8);
+}
+
+code {
+  font-family: "Cascadia Mono", "Consolas", "SFMono-Regular", monospace;
+  font-size: .88em;
+  padding: 1px 5px;
+  border-radius: 2px;
+  background: rgba(60, 45, 30, .06);
+  border: 1px solid var(--line-soft);
+  color: var(--ink-2);
+  word-break: break-all;
+}
+
+/* ---------------- 引语小卡 ---------------- */
+
+.quote-card { padding: 18px 22px; text-align: center; }
+.quote-card .quote {
+  margin: 0;
+  font-family: var(--font-kai);
+  font-size: 16px;
+  letter-spacing: .16em;
+  color: var(--ink-2);
+}
+.quote-card .quote-src {
+  margin: 6px 0 0;
+  font-size: 11px;
+  color: var(--ink-4);
+  letter-spacing: .14em;
+}
+
+/* ---------------- 浮层提示 ---------------- */
+
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: 34px;
+  transform: translate(-50%, 14px);
+  z-index: 90;
+  padding: 9px 20px;
+  background: rgba(36, 31, 25, .92);
+  color: #f7f1e4;
+  font-size: 13.5px;
+  letter-spacing: .08em;
+  border-radius: 2px;
+  box-shadow: 0 12px 30px -12px rgba(0, 0, 0, .5);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .22s, transform .22s;
+}
+.toast.show { opacity: 1; transform: translate(-50%, 0); }
+
+/* ---------------- 页脚 ---------------- */
+
+.foot {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 18px 30px;
+  border-top: 1px solid var(--line-soft);
+  font-size: 11.5px;
+  color: var(--ink-4);
+  letter-spacing: .18em;
+}
+
+/* ---------------- 响应式 ---------------- */
+
+@media (max-width: 1120px) {
+  .layout { grid-template-columns: 1fr; padding: 20px 20px 60px; }
+  .sidebar { display: grid; grid-template-columns: 1fr 1fr; }
+  .hex-row { grid-template-columns: 1fr 20px 1fr 20px 1fr; }
+}
+
+@media (max-width: 780px) {
+  .topbar { flex-wrap: wrap; gap: 10px; padding: 10px 16px; }
+  .today { display: none; }
+  .main-nav { margin-left: auto; }
+  .main-nav button { padding: 8px 10px; font-size: 14px; }
+  .brand-text em { display: none; }
+  .sidebar { grid-template-columns: 1fr; }
+  .layout { padding: 16px 14px 50px; }
+  .hex-row { grid-template-columns: 1fr; gap: 14px; }
+  .hex-arrow { display: none; }
+  .chart-head { flex-direction: column; }
+  .chart-actions { justify-content: flex-start; }
+  .chart-head h2 { font-size: 30px; }
+  .verdict-head { flex-direction: column; align-items: flex-start; gap: 14px; }
+  .grade-badge { width: 72px; height: 72px; }
+  .grade-badge strong { font-size: 25px; }
+  .cases-grid { grid-template-columns: 1fr; padding: 20px 14px 60px; }
+  .page-head { padding: 30px 16px 6px; }
+  .page-head h1 { font-size: 27px; }
+  .study-wrap, .about-wrap { padding: 14px 14px 60px; }
+  .foot { padding: 14px 16px; flex-direction: column; gap: 4px; }
+  .field-row { flex-wrap: wrap; }
+}
+
+@media (max-width: 520px) {
+  .topbar { padding: 8px 12px; gap: 6px; }
+  .brand-text strong { font-size: 19px; letter-spacing: .12em; }
+  .seal { width: 36px; height: 36px; font-size: 21px; }
+  .main-nav { width: 100%; justify-content: space-between; margin: 0; }
+  .main-nav button { flex: 1; padding: 6px 2px; font-size: 13.5px; letter-spacing: .08em; }
+  .main-nav button.active::after { left: 25%; right: 25%; }
+  .chart-head h2 { font-size: 28px; }
+  .sec p { font-size: 14px; }
+  .field-row { gap: 8px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .001ms !important; transition-duration: .001ms !important; }
+}
+
+/* ---------------- 打印 ---------------- */
+
+@media print {
+  body { background: #fff; }
+  .topbar, .sidebar, .foot, .chart-actions, .tabbar, .detail-card, .empty-state, .main-nav, .toast { display: none !important; }
+  .layout { display: block; padding: 0; max-width: none; }
+  .view { display: none !important; }
+  #view-cast { display: block !important; }
+  .result { gap: 12px; }
+  .result > .card { animation: none !important; opacity: 1 !important; transform: none !important; }
+  .card { box-shadow: none; border-color: #bbb; break-inside: auto; }
+  .chart-card, .sec, .grade-badge { break-inside: avoid; }
+  .card::before { display: none; }
+  .hex-row { grid-template-columns: 1fr 20px 1fr 20px 1fr; }
+  .chart-head h2 { font-size: 30px; }
+  .sec { break-inside: avoid; }
+  .grade-badge { border-color: #333; }
+}
+</style>
+<script>
+  window.addEventListener('error', function (e) {
+    var el = document.getElementById('jsError');
+    if (!el) {
+      el = document.createElement('div');
+      el.id = 'jsError';
+      el.style.cssText = 'position:fixed;left:0;right:0;top:0;z-index:999;background:#982a20;color:#fff;font:13px/1.6 sans-serif;padding:10px 16px;white-space:pre-wrap';
+      document.body.appendChild(el);
+    }
+    el.textContent = '脚本错误：' + e.message + '\n' + (e.filename || '') + ':' + (e.lineno || '');
+  });
+</script>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+</head>
+<body>
+<div class="app">
+
+  <header class="topbar">
+    <a class="brand" href="#" data-view="cast">
+      <span class="seal">梅</span>
+      <span class="brand-text">
+        <strong>梅花易数</strong>
+        <em>排盘 · 断卦 · 心易</em>
+      </span>
+    </a>
+    <nav class="main-nav" id="mainNav">
+      <button data-view="cast" class="active">排盘</button>
+      <button data-view="cases">卦例</button>
+      <button data-view="study">断诀</button>
+      <button data-view="about">说明</button>
+    </nav>
+    <div class="today" id="todayInfo"></div>
+  </header>
+
+  <!-- ============ 排盘 ============ -->
+  <main class="view active" id="view-cast">
+    <div class="layout">
+
+      <aside class="sidebar">
+        <section class="card cast-card">
+          <div class="card-title">
+            <h2>起卦</h2>
+            <span class="card-note">心诚则灵，一事一占</span>
+          </div>
+
+          <div class="segmented" id="methodTabs">
+            <button data-method="time" class="active">时间</button>
+            <button data-method="number">数字</button>
+            <button data-method="char">字占</button>
+            <button data-method="manual">手动</button>
+          </div>
+
+          <div class="pane active" data-pane="time">
+            <label class="field">
+              <span>起卦时刻</span>
+              <input type="datetime-local" id="timeInput">
+            </label>
+            <div class="hint" id="timeHint"></div>
+            <label class="check">
+              <input type="checkbox" id="lateZi" checked>
+              <span>晚子时（23 时后）作次日论</span>
+            </label>
+
+            <details class="lunar-fallback" id="lunarFallback">
+              <summary>手动农历（备用）</summary>
+              <div class="field-row">
+                <label class="field">
+                  <span>年干支</span>
+                  <select id="lunYear"></select>
+                </label>
+                <label class="field">
+                  <span>农历月</span>
+                  <select id="lunMonth"></select>
+                </label>
+              </div>
+              <div class="field-row">
+                <label class="field">
+                  <span>农历日</span>
+                  <select id="lunDay"></select>
+                </label>
+                <label class="field">
+                  <span>时辰</span>
+                  <select id="lunHour"></select>
+                </label>
+              </div>
+              <label class="check">
+                <input type="checkbox" id="lunLeap">
+                <span>闰月（作本月论）</span>
+              </label>
+              <div class="hint" id="lunarFallbackHint">展开此项后，起卦将按上方填写的农历年月日时计算；月建仍按公历节气推算。</div>
+            </details>
+          </div>
+
+          <div class="pane" data-pane="number">
+            <div class="field-row">
+              <label class="field">
+                <span>上卦数</span>
+                <input type="number" id="num1" min="1" step="1" placeholder="如 34">
+              </label>
+              <label class="field">
+                <span>下卦数</span>
+                <input type="number" id="num2" min="1" step="1" placeholder="如 43">
+              </label>
+              <label class="field narrow">
+                <span>三数</span>
+                <input type="number" id="num3" min="0" step="1" placeholder="可空">
+              </label>
+            </div>
+            <div class="hint">先天卦数：乾一 兑二 离三 震四 巽五 坎六 艮七 坤八。两数起卦以和取动爻。</div>
+          </div>
+
+          <div class="pane" data-pane="char">
+            <label class="field">
+              <span>所见之字</span>
+              <input type="text" id="charInput" maxlength="40" placeholder="如：今日动静如何">
+            </label>
+            <div class="field-row">
+              <label class="field">
+                <span>上卦数（选填）</span>
+                <input type="number" id="charUpper" min="0" step="1" placeholder="笔画/平仄数">
+              </label>
+              <label class="field">
+                <span>下卦数（选填）</span>
+                <input type="number" id="charLower" min="0" step="1" placeholder="笔画/平仄数">
+              </label>
+            </div>
+            <div class="hint">古法以笔画或平仄取数；留空则按字数平分上下卦。</div>
+          </div>
+
+          <div class="pane" data-pane="manual">
+            <div class="field-row">
+              <label class="field">
+                <span>上卦</span>
+                <select id="manUpper"></select>
+              </label>
+              <label class="field">
+                <span>下卦</span>
+                <select id="manLower"></select>
+              </label>
+            </div>
+            <label class="field">
+              <span>动爻</span>
+              <select id="manMoving">
+                <option value="1">初爻</option>
+                <option value="2">二爻</option>
+                <option value="3">三爻</option>
+                <option value="4">四爻</option>
+                <option value="5">五爻</option>
+                <option value="6">上爻</option>
+              </select>
+            </label>
+            <div class="hint">自下而上，动爻所在之卦为用，另一卦为体。</div>
+          </div>
+
+          <div class="divider"></div>
+
+          <div class="field-row">
+            <label class="field">
+              <span>所占何事</span>
+              <select id="topicSelect"></select>
+            </label>
+            <label class="field">
+              <span>起卦时状态</span>
+              <select id="motionSelect">
+                <option value="zuo">坐（应迟）</option>
+                <option value="li">立（半迟半速）</option>
+                <option value="xing">行（应速）</option>
+              </select>
+            </label>
+          </div>
+
+          <div class="cast-actions">
+            <button class="btn primary" id="castBtn">起 卦</button>
+            <button class="btn ghost" id="randomBtn" title="以当下时刻与随机数起卦">心易一卦</button>
+          </div>
+          <div class="error" id="castError" hidden></div>
+        </section>
+
+        <section class="card history-card">
+          <div class="card-title">
+            <h2>记录</h2>
+            <button class="link-btn" id="clearHistory">清空</button>
+          </div>
+          <ul class="history-list" id="historyList">
+            <li class="empty-line">尚无记录</li>
+          </ul>
+        </section>
+
+        <section class="card quote-card">
+          <p class="quote">不动不占，不因事不占。</p>
+          <p class="quote-src">《梅花易数 · 观梅占》</p>
+        </section>
+      </aside>
+
+      <section class="board">
+        <div class="empty-state" id="emptyState">
+          <div class="empty-hex">
+            <i></i><i></i><i></i><i></i><i></i><i></i>
+          </div>
+          <h2>寂然不动，感而遂通</h2>
+          <p>择时、报数，或写下一念之字，起一卦以观其象。</p>
+          <div class="empty-tips">
+            <span>体用生克</span><span>互卦观中</span><span>变卦观终</span><span>旺衰定力</span><span>应期定日</span>
+          </div>
+        </div>
+
+        <div class="result" id="result" hidden>
+          <section class="card chart-card" id="chartCard">
+            <div class="chart-head">
+              <div>
+                <div class="eyebrow" id="chartEyebrow">年月日时起卦</div>
+                <h2 id="chartTitle">泽火革</h2>
+                <div class="chart-sub" id="chartSub"></div>
+              </div>
+              <div class="chart-actions">
+                <button class="btn tiny" data-act="copy">复制断语</button>
+                <button class="btn tiny" data-act="print">打印</button>
+                <button class="btn tiny" data-act="save">存记录</button>
+              </div>
+            </div>
+
+            <div class="meta-grid" id="metaGrid"></div>
+            <div class="meta-note" id="metaNote"></div>
+
+            <div class="hex-row" id="hexRow"></div>
+
+            <div class="tiyong" id="tiyongStrip"></div>
+          </section>
+
+          <section class="card verdict-card">
+            <div class="verdict-head">
+              <div class="grade-badge" id="gradeBadge" data-grade="ji">
+                <strong>吉</strong>
+                <span>卦势</span>
+              </div>
+              <div class="verdict-summary">
+                <p class="verdict-line" id="verdictLine"></p>
+                <div class="meter" aria-hidden="true"><span id="meterFill"></span></div>
+                <div class="meter-scale"><span>凶</span><span>平</span><span>吉</span></div>
+              </div>
+            </div>
+            <div class="sections" id="sections"></div>
+            <div class="advice-block" id="adviceBlock"></div>
+          </section>
+
+          <section class="card detail-card">
+            <div class="tabbar" id="detailTabs">
+              <button data-tab="gua" class="active">卦辞</button>
+              <button data-tab="xiang">万物类象</button>
+              <button data-tab="cuo">错综之卦</button>
+              <button data-tab="rules">断诀</button>
+            </div>
+            <div class="detail-body" id="detailBody"></div>
+          </section>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <!-- ============ 卦例 ============ -->
+  <main class="view" id="view-cases">
+    <div class="page-head">
+      <h1>观梅卦例</h1>
+      <p>依《增广校正梅花易数》卷一、卷四所载占例复原；每例皆可回填卦盘，对照体用生克与应期。</p>
+    </div>
+    <div class="cases-grid" id="casesGrid"></div>
+  </main>
+
+  <!-- ============ 断诀 ============ -->
+  <main class="view" id="view-study">
+    <div class="page-head">
+      <h1>断卦要诀</h1>
+      <p>起卦、体用、旺衰、互变、应期——梅花易数断卦的次第，尽在于此。</p>
+    </div>
+    <div class="study-wrap" id="studyBody"></div>
+  </main>
+
+  <!-- ============ 说明 ============ -->
+  <main class="view" id="view-about">
+    <div class="page-head">
+      <h1>关于此器</h1>
+      <p>一个可以离线使用的梅花易数排盘与断卦工具。</p>
+    </div>
+    <div class="about-wrap">
+      <section class="card prose">
+        <h2>用法</h2>
+        <ol>
+          <li><b>起卦</b>：时间起卦最常用——以农历年支数、月、日之和取上卦，再加时辰数取下卦，总数取动爻。也可报数、写字，或直接指定上下卦与动爻。</li>
+          <li><b>看盘</b>：本卦为事之体，互卦为事之中，变卦为事之终。动爻所在之卦为「用」，另一卦为「体」。</li>
+          <li><b>断卦</b>：先看体用生克定吉凶，再以月令旺衰定力量，参互卦看过程、变卦看结局，最后以成卦之数与用卦五行定应期。</li>
+          <li><b>存证</b>：点「存记录」可留存卦盘；「复制断语」生成可分享的文字；「打印」输出干净的排盘单。</li>
+        </ol>
+      </section>
+      <section class="card prose">
+        <h2>体例</h2>
+        <p>卦辞、大象取自《周易》；起卦法、体用总诀、十八占、八卦万物类占、占例原文，均据九州出版社《增广校正梅花易数》（宋·邵雍撰，李一忻点校，郑同增订，2007 年）整理，个别明显讹字依通行本校正。</p>
+        <p>农历换算使用浏览器内置的中国历（Intl Chinese calendar），节气月建以近似日期推算，交节前后一日可能有一日之差，可在断卦时自行参酌。</p>
+        <p>梅花易数重在「象」与「理」，此器所出断语为依规则推演之参考，并非宿命判决。占者当以事理为归，不可执数而忘理。</p>
+      </section>
+      <section class="card prose">
+        <h2>在别的设备上使用</h2>
+        <p><b>单文件版</b>：<code>dist/梅花易数.html</code> 把 CSS、JS 全部内联在一个文件里，拷到 U 盘、发到手机或另一台电脑，用浏览器打开即可，断网也能用。</p>
+        <p><b>局域网</b>：在本机运行 <code>python -m http.server 8848 --bind 0.0.0.0</code>，手机连同一 Wi-Fi，访问 <code>http://电脑IP:8848</code>，iPhone 与 Android 都稳。</p>
+        <p><b>托管 / 安装</b>：把整个目录（或 <code>dist/梅花易数-网站版.zip</code>）传到 GitHub Pages、Netlify、Vercel 等静态托管；HTTPS 下可在手机浏览器「添加到主屏幕」，像 App 一样离线打开。</p>
+      </section>
+
+      <section class="card prose">
+        <h2>快捷键</h2>
+        <ul>
+          <li><kbd>Enter</kbd> 在输入框中直接起卦</li>
+          <li><kbd>R</kbd> 心易随机一卦</li>
+          <li><kbd>P</kbd> 打印当前卦盘</li>
+        </ul>
+      </section>
+    </div>
+  </main>
+
+  <footer class="foot">
+    <span>梅花易数 · 排盘断卦</span>
+    <span>观物取象，以象尽意</span>
+  </footer>
+</div>
+
+<script>
+/*!
+ * 梅花易数 · 数据核心
+ * 八卦、六十四卦、卦辞、大象
+ */
+(function (global) {
+  'use strict';
+
+  // 先天八卦数：乾一 兑二 离三 震四 巽五 坎六 艮七 坤八
+  // bits 为自下而上的三爻（1 阳，0 阴）
+  const TRIGRAMS = {
+    qian: {
+      key: 'qian', name: '乾', symbol: '☰', nature: '天', virtue: '健',
+      bits: [1, 1, 1], num: 1, wuxing: '金', direction: '西北', family: '父', body: '首',
+      animal: '马', color: '大赤、玄', season: '秋', image: '天行健'
+    },
+    dui: {
+      key: 'dui', name: '兑', symbol: '☱', nature: '泽', virtue: '悦',
+      bits: [1, 1, 0], num: 2, wuxing: '金', direction: '西', family: '少女', body: '口舌',
+      animal: '羊', color: '白', season: '秋', image: '丽泽兑'
+    },
+    li: {
+      key: 'li', name: '离', symbol: '☲', nature: '火', virtue: '丽',
+      bits: [1, 0, 1], num: 3, wuxing: '火', direction: '南', family: '中女', body: '目',
+      animal: '雉', color: '赤、紫', season: '夏', image: '明两作'
+    },
+    zhen: {
+      key: 'zhen', name: '震', symbol: '☳', nature: '雷', virtue: '动',
+      bits: [1, 0, 0], num: 4, wuxing: '木', direction: '东', family: '长男', body: '足',
+      animal: '龙', color: '青、绿', season: '春', image: '洊雷震'
+    },
+    xun: {
+      key: 'xun', name: '巽', symbol: '☴', nature: '风', virtue: '入',
+      bits: [0, 1, 1], num: 5, wuxing: '木', direction: '东南', family: '长女', body: '股',
+      animal: '鸡', color: '青、绿', season: '春', image: '随风巽'
+    },
+    kan: {
+      key: 'kan', name: '坎', symbol: '☵', nature: '水', virtue: '陷',
+      bits: [0, 1, 0], num: 6, wuxing: '水', direction: '北', family: '中男', body: '耳',
+      animal: '豕', color: '黑', season: '冬', image: '水洊至'
+    },
+    gen: {
+      key: 'gen', name: '艮', symbol: '☶', nature: '山', virtue: '止',
+      bits: [0, 0, 1], num: 7, wuxing: '土', direction: '东北', family: '少男', body: '手指',
+      animal: '狗', color: '黄', season: '冬春之交', image: '兼山艮'
+    },
+    kun: {
+      key: 'kun', name: '坤', symbol: '☷', nature: '地', virtue: '顺',
+      bits: [0, 0, 0], num: 8, wuxing: '土', direction: '西南', family: '母', body: '腹',
+      animal: '牛', color: '黄、黑', season: '四季月', image: '地势坤'
+    }
+  };
+
+  const TRIGRAM_ORDER = ['qian', 'dui', 'li', 'zhen', 'xun', 'kan', 'gen', 'kun'];
+
+  // 由三爻（自下而上）取得卦
+  function trigramByBits(bits) {
+    for (let i = 0; i < TRIGRAM_ORDER.length; i += 1) {
+      const t = TRIGRAMS[TRIGRAM_ORDER[i]];
+      if (t.bits[0] === bits[0] && t.bits[1] === bits[1] && t.bits[2] === bits[2]) return t;
+    }
+    return null;
+  }
+
+  // 由先天数取卦（1-8，8 为坤）
+  function trigramByNumber(n) {
+    let i = ((n - 1) % 8 + 8) % 8;
+    return TRIGRAMS[TRIGRAM_ORDER[i]];
+  }
+
+  // 上卦、下卦 -> 六十四卦。h = [upperKey, lowerKey, 卦名, 卦辞, 大象, 卦义]
+  const HEX_LIST = [
+    ['qian', 'qian', '乾为天', '元，亨，利，贞。', '天行健，君子以自强不息。', '刚健·创始'],
+    ['qian', 'dui', '天泽履', '履虎尾，不咥人，亨。', '上天下泽，履；君子以辨上下，定民志。', '践履·守礼'],
+    ['qian', 'li', '天火同人', '同人于野，亨。利涉大川，利君子贞。', '天与火，同人；君子以类族辨物。', '同心·协力'],
+    ['qian', 'zhen', '天雷无妄', '元，亨，利，贞。其匪正有眚，不利有攸往。', '天下雷行，物与无妄；先王以茂对时育万物。', '真实·无妄'],
+    ['qian', 'xun', '天风姤', '女壮，勿用取女。', '天下有风，姤；后以施命诰四方。', '相遇·防微'],
+    ['qian', 'kan', '天水讼', '有孚，窒惕，中吉，终凶。利见大人，不利涉大川。', '天与水违行，讼；君子以作事谋始。', '争讼·慎争'],
+    ['qian', 'gen', '天山遁', '亨，小利贞。', '天下有山，遁；君子以远小人，不恶而严。', '退避·守时'],
+    ['qian', 'kun', '天地否', '否之匪人，不利君子贞，大往小来。', '天地不交，否；君子以俭德辟难，不可荣以禄。', '闭塞·守正'],
+
+    ['dui', 'qian', '泽天夬', '扬于王庭，孚号有厉。告自邑，不利即戎，利有攸往。', '泽上于天，夬；君子以施禄及下，居德则忌。', '决断·决除'],
+    ['dui', 'dui', '兑为泽', '亨，利贞。', '丽泽，兑；君子以朋友讲习。', '喜悦·讲习'],
+    ['dui', 'li', '泽火革', '己日乃孚，元亨，利贞，悔亡。', '泽中有火，革；君子以治历明时。', '变革·鼎新'],
+    ['dui', 'zhen', '泽雷随', '元亨，利贞，无咎。', '泽中有雷，随；君子以向晦入宴息。', '随顺·随时'],
+    ['dui', 'xun', '泽风大过', '栋桡，利有攸往，亨。', '泽灭木，大过；君子以独立不惧，遁世无闷。', '过甚·非常'],
+    ['dui', 'kan', '泽水困', '亨，贞，大人吉，无咎。有言不信。', '泽无水，困；君子以致命遂志。', '困穷·致命'],
+    ['dui', 'gen', '泽山咸', '亨，利贞。取女吉。', '山上有泽，咸；君子以虚受人。', '感应·相与'],
+    ['dui', 'kun', '泽地萃', '亨，王假有庙。利见大人，亨，利贞。用大牲吉，利有攸往。', '泽上于地，萃；君子以除戎器，戒不虞。', '聚集·萃合'],
+
+    ['li', 'qian', '火天大有', '元亨。', '火在天上，大有；君子以遏恶扬善，顺天休命。', '丰有·盛明'],
+    ['li', 'dui', '火泽睽', '小事吉。', '上火下泽，睽；君子以同而异。', '乖离·求同'],
+    ['li', 'li', '离为火', '利贞，亨。畜牝牛，吉。', '明两作，离；大人以继明照于四方。', '附丽·光明'],
+    ['li', 'zhen', '火雷噬嗑', '亨。利用狱。', '雷电，噬嗑；先王以明罚敕法。', '决断·除梗'],
+    ['li', 'xun', '火风鼎', '元吉，亨。', '木上有火，鼎；君子以正位凝命。', '鼎新·养贤'],
+    ['li', 'kan', '火水未济', '亨。小狐汔济，濡其尾，无攸利。', '火在水上，未济；君子以慎辨物居方。', '未成·慎辨'],
+    ['li', 'gen', '火山旅', '小亨，旅贞吉。', '山上有火，旅；君子以明慎用刑而不留狱。', '行旅·羁旅'],
+    ['li', 'kun', '火地晋', '康侯用锡马蕃庶，昼日三接。', '明出地上，晋；君子以自昭明德。', '晋升·光明'],
+
+    ['zhen', 'qian', '雷天大壮', '利贞。', '雷在天上，大壮；君子以非礼弗履。', '壮盛·守礼'],
+    ['zhen', 'dui', '雷泽归妹', '征凶，无攸利。', '泽上有雷，归妹；君子以永终知敝。', '婚嫁·失序'],
+    ['zhen', 'li', '雷火丰', '亨，王假之，勿忧，宜日中。', '雷电皆至，丰；君子以折狱致刑。', '丰盛·日中'],
+    ['zhen', 'zhen', '震为雷', '亨。震来虩虩，笑言哑哑。震惊百里，不丧匕鬯。', '洊雷，震；君子以恐惧修省。', '震动·惊惧'],
+    ['zhen', 'xun', '雷风恒', '亨，无咎，利贞，利有攸往。', '雷风，恒；君子以立不易方。', '恒久·守常'],
+    ['zhen', 'kan', '雷水解', '利西南。无所往，其来复吉。有攸往，夙吉。', '雷雨作，解；君子以赦过宥罪。', '解缓·纾难'],
+    ['zhen', 'gen', '雷山小过', '亨，利贞。可小事，不可大事。飞鸟遗之音，不宜上，宜下，大吉。', '山上有雷，小过；君子以行过乎恭，丧过乎哀，用过乎俭。', '小过·宜下'],
+    ['zhen', 'kun', '雷地豫', '利建侯行师。', '雷出地奋，豫；先王以作乐崇德，殷荐之上帝，以配祖考。', '和乐·预备'],
+
+    ['xun', 'qian', '风天小畜', '亨。密云不雨，自我西郊。', '风行天上，小畜；君子以懿文德。', '小蓄·待时'],
+    ['xun', 'dui', '风泽中孚', '豚鱼吉，利涉大川，利贞。', '泽上有风，中孚；君子以议狱缓死。', '诚信·感通'],
+    ['xun', 'li', '风火家人', '利女贞。', '风自火出，家人；君子以言有物而行有恒。', '齐家·内治'],
+    ['xun', 'zhen', '风雷益', '利有攸往，利涉大川。', '风雷，益；君子以见善则迁，有过则改。', '增益·利往'],
+    ['xun', 'xun', '巽为风', '小亨，利有攸往，利见大人。', '随风，巽；君子以申命行事。', '顺入·申命'],
+    ['xun', 'kan', '风水涣', '亨。王假有庙，利涉大川，利贞。', '风行水上，涣；先王以享于帝立庙。', '涣散·济难'],
+    ['xun', 'gen', '风山渐', '女归吉，利贞。', '山上有木，渐；君子以居贤德善俗。', '渐进·有序'],
+    ['xun', 'kun', '风地观', '盥而不荐，有孚颙若。', '风行地上，观；先王以省方观民设教。', '观察·示范'],
+
+    ['kan', 'qian', '水天需', '有孚，光亨，贞吉。利涉大川。', '云上于天，需；君子以饮食宴乐。', '等待·蓄势'],
+    ['kan', 'dui', '水泽节', '亨。苦节不可贞。', '泽上有水，节；君子以制数度，议德行。', '节制·有度'],
+    ['kan', 'li', '水火既济', '亨，小利贞。初吉终乱。', '水在火上，既济；君子以思患而豫防之。', '已成·防患'],
+    ['kan', 'zhen', '水雷屯', '元亨，利贞。勿用有攸往，利建侯。', '云雷，屯；君子以经纶。', '初生·艰难'],
+    ['kan', 'xun', '水风井', '改邑不改井，无丧无得，往来井井。汔至亦未繘井，羸其瓶，凶。', '木上有水，井；君子以劳民劝相。', '井养·恒常'],
+    ['kan', 'kan', '坎为水', '习坎，有孚，维心亨，行有尚。', '水洊至，习坎；君子以常德行，习教事。', '险陷·习险'],
+    ['kan', 'gen', '水山蹇', '利西南，不利东北。利见大人，贞吉。', '山上有水，蹇；君子以反身修德。', '艰难·反身'],
+    ['kan', 'kun', '水地比', '吉。原筮，元永贞，无咎。不宁方来，后夫凶。', '地上有水，比；先王以建万国，亲诸侯。', '亲附·辅佐'],
+
+    ['gen', 'qian', '山天大畜', '利贞。不家食吉，利涉大川。', '天在山中，大畜；君子以多识前言往行，以畜其德。', '大蓄·养德'],
+    ['gen', 'dui', '山泽损', '有孚，元吉，无咎，可贞，利有攸往。曷之用？二簋可用享。', '山下有泽，损；君子以惩忿窒欲。', '损下·益上'],
+    ['gen', 'li', '山火贲', '亨。小利有攸往。', '山下有火，贲；君子以明庶政，无敢折狱。', '文饰·质本'],
+    ['gen', 'zhen', '山雷颐', '贞吉。观颐，自求口实。', '山下有雷，颐；君子以慎言语，节饮食。', '颐养·自求'],
+    ['gen', 'xun', '山风蛊', '元亨，利涉大川。先甲三日，后甲三日。', '山下有风，蛊；君子以振民育德。', '积弊·整治'],
+    ['gen', 'kan', '山水蒙', '亨。匪我求童蒙，童蒙求我。初筮告，再三渎，渎则不告。利贞。', '山下出泉，蒙；君子以果行育德。', '蒙昧·启蒙'],
+    ['gen', 'gen', '艮为山', '艮其背，不获其身；行其庭，不见其人。无咎。', '兼山，艮；君子以思不出其位。', '止静·守位'],
+    ['gen', 'kun', '山地剥', '不利有攸往。', '山附于地，剥；上以厚下安宅。', '剥落·守本'],
+
+    ['kun', 'qian', '地天泰', '小往大来，吉亨。', '天地交，泰；后以财成天地之道，辅相天地之宜，以左右民。', '通泰·交融'],
+    ['kun', 'dui', '地泽临', '元亨，利贞。至于八月有凶。', '泽上有地，临；君子以教思无穷，容保民无疆。', '临下·亲民'],
+    ['kun', 'li', '地火明夷', '利艰贞。', '明入地中，明夷；君子以莅众，用晦而明。', '晦明·守晦'],
+    ['kun', 'zhen', '地雷复', '亨。出入无疾，朋来无咎。反复其道，七日来复。利有攸往。', '雷在地中，复；先王以至日闭关，商旅不行，后不省方。', '回复·生机'],
+    ['kun', 'xun', '地风升', '元亨，用见大人，勿恤，南征吉。', '地中生木，升；君子以顺德，积小以高大。', '上升·渐进'],
+    ['kun', 'kan', '地水师', '贞，丈人吉，无咎。', '地中有水，师；君子以容民畜众。', '统众·用兵'],
+    ['kun', 'gen', '地山谦', '亨，君子有终。', '地中有山，谦；君子以裒多益寡，称物平施。', '谦逊·受益'],
+    ['kun', 'kun', '坤为地', '元亨，利牝马之贞。君子有攸往，先迷后得主，利西南得朋，东北丧朋。安贞，吉。', '地势坤，君子以厚德载物。', '柔顺·承载']
+  ];
+
+  const HEXAGRAMS = {};
+  const HEX_BY_NUM = {};
+  // 周易通行本（王弼本）卦序
+  const KINGWEN = {
+    '乾为天': 1, '坤为地': 2, '水雷屯': 3, '山水蒙': 4, '水天需': 5, '天水讼': 6, '地水师': 7, '水地比': 8,
+    '风天小畜': 9, '天泽履': 10, '地天泰': 11, '天地否': 12, '天火同人': 13, '火天大有': 14, '地山谦': 15, '雷地豫': 16,
+    '泽雷随': 17, '山风蛊': 18, '地泽临': 19, '风地观': 20, '火雷噬嗑': 21, '山火贲': 22, '山地剥': 23, '地雷复': 24,
+    '天雷无妄': 25, '山天大畜': 26, '山雷颐': 27, '泽风大过': 28, '坎为水': 29, '离为火': 30, '泽山咸': 31, '雷风恒': 32,
+    '天山遁': 33, '雷天大壮': 34, '火地晋': 35, '地火明夷': 36, '风火家人': 37, '火泽睽': 38, '水山蹇': 39, '雷水解': 40,
+    '山泽损': 41, '风雷益': 42, '泽天夬': 43, '天风姤': 44, '泽地萃': 45, '地风升': 46, '泽水困': 47, '水风井': 48,
+    '泽火革': 49, '火风鼎': 50, '震为雷': 51, '艮为山': 52, '风山渐': 53, '雷泽归妹': 54, '雷火丰': 55, '火山旅': 56,
+    '巽为风': 57, '兑为泽': 58, '风水涣': 59, '水泽节': 60, '风泽中孚': 61, '雷山小过': 62, '水火既济': 63, '火水未济': 64
+  };
+
+  HEX_LIST.forEach(function (row) {
+    const upper = TRIGRAMS[row[0]];
+    const lower = TRIGRAMS[row[1]];
+    const key = row[0] + '-' + row[1];
+    HEXAGRAMS[key] = {
+      key: key,
+      seq: KINGWEN[row[2]],
+      name: row[2],
+      guaci: row[3],
+      xiang: row[4],
+      meaning: row[5],
+      upper: upper,
+      lower: lower
+    };
+    HEX_BY_NUM[HEXAGRAMS[key].seq] = HEXAGRAMS[key];
+  });
+
+  const NAMES = HEX_LIST.map(function (r) { return r[2]; });
+
+  function getHex(upperKey, lowerKey) {
+    return HEXAGRAMS[upperKey + '-' + lowerKey];
+  }
+
+  // 由六爻（自下而上，1 阳 0 阴）取卦
+  function hexByLines(lines) {
+    const lower = trigramByBits(lines.slice(0, 3));
+    const upper = trigramByBits(lines.slice(3, 6));
+    return getHex(upper.key, lower.key);
+  }
+
+  global.MHData = {
+    TRIGRAMS: TRIGRAMS,
+    TRIGRAM_ORDER: TRIGRAM_ORDER,
+    HEXAGRAMS: HEXAGRAMS,
+    HEX_BY_NUM: HEX_BY_NUM,
+    HEX_NAMES: NAMES,
+    trigramByBits: trigramByBits,
+    trigramByNumber: trigramByNumber,
+    getHex: getHex,
+    hexByLines: hexByLines
+  };
+})(typeof window !== 'undefined' ? window : globalThis);
+</script>
+<script>
+/*!
+ * 梅花易数 · 八卦万物类占
+ * 依据《增广校正梅花易数》卷一「八卦万物类占」整理
+ */
+(function (global) {
+  'use strict';
+
+  const CATEGORIES = [
+    ['tianshi', '天时'],
+    ['dili', '地理'],
+    ['renwu', '人物'],
+    ['renshi', '人事'],
+    ['shenti', '身体'],
+    ['shixu', '时序'],
+    ['dongwu', '动物'],
+    ['jingwu', '静物'],
+    ['wushe', '屋舍'],
+    ['jiazhai', '家宅'],
+    ['hunyin', '婚姻'],
+    ['yinshi', '饮食'],
+    ['shengchan', '生产'],
+    ['qiuming', '求名'],
+    ['mouwang', '谋望'],
+    ['jiaoyi', '交易'],
+    ['qiuli', '求利'],
+    ['chuxing', '出行'],
+    ['yejian', '谒见'],
+    ['jibing', '疾病'],
+    ['guansong', '官讼'],
+    ['fenmu', '坟墓'],
+    ['fangdao', '方道'],
+    ['wuse', '五色'],
+    ['wuwei', '五味'],
+    ['shumu', '数目'],
+    ['wuyin', '五音']
+  ];
+
+  const XIANG = {
+    qian: {
+      tianshi: '天、晴、寒、冰、雹、霰。',
+      dili: '西北方、京都、大郡、形胜之地、高亢之所。',
+      renwu: '君父、大人、老人、长者、宦官、名人、公门人。',
+      renshi: '刚健武勇、果决、多动少静、高上下屈。',
+      shenti: '首、骨、肺。',
+      shixu: '秋、九十月之交、戌亥年月日时、五金年月日时。',
+      dongwu: '马、天鹅、狮、象、良马、老马、瘠马、驳马。',
+      jingwu: '金玉、宝珠、圆物、木果、刚物、冠、镜。',
+      wushe: '公廨、楼台、高堂、大厦、驿舍、西北向之居。',
+      jiazhai: '秋占宅兴隆，夏占有祸，冬占冷落，春占吉利。',
+      hunyin: '贵官之眷、有声名之家。秋占宜成，冬夏占不利。',
+      yinshi: '马肉、珍味、多骨、肝肺、干肉、水果、诸物之首、圆物、辛辣之物。',
+      shengchan: '易生，秋占生贵子，夏占有损，坐宜向西北。',
+      qiuming: '有名，宜随朝内任、刑官、武职、掌权，宜西北方之任、天使、驿官。',
+      mouwang: '有成，利公门，宜动中有财；夏占不成，冬占多谋少遂。',
+      jiaoyi: '宜金玉、珍宝、珠、贵货，易成，夏占不利。',
+      qiuli: '有财，金玉之利，公门中得财。秋占大利，夏占损财，冬占无财。',
+      chuxing: '利于出行，宜入京师，利西北之行，夏占不利。',
+      yejian: '利见大人、有德行之人，宜见官贵，可见。',
+      jibing: '头面之疾、肺疾、筋骨疾、上焦病，夏占不安。',
+      guansong: '健讼，有贵人助。秋占得胜，夏占失理。',
+      fenmu: '宜向西北，宜乾山气脉，宜天穴，宜高。秋占出贵，夏占大凶。',
+      fangdao: '西北。',
+      wuse: '大赤色、玄色。',
+      wuwei: '辛、辣。',
+      shumu: '一、四、九。',
+      wuyin: '商音。'
+    },
+    dui: {
+      tianshi: '雨、泽、露、霜、雾。',
+      dili: '西方、泽畔、水际、缺池、废井、山崩破裂之地。',
+      renwu: '少女、妾、歌妓、伶人、巫、译人、奴仆。',
+      renshi: '喜悦、口舌、谗毁、谤说、饮食。',
+      shenti: '舌、口、喉、肺、痰、涎。',
+      shixu: '秋、酉年月日时、金年月日时。',
+      dongwu: '羊、泽中之物、有口之禽。',
+      jingwu: '金刃、金类、乐器、废物、缺器、带口之物。',
+      wushe: '西向之居、近泽之居、败墙、户牖。',
+      jiazhai: '不安，防口舌；秋占喜，夏占不利。',
+      hunyin: '不成，秋占可成、有喜，主成婚之吉，利少女。',
+      yinshi: '羊肉、泽中之物、宿味、辛辣之味。',
+      shengchan: '不利，恐有损胎，或生女，宜向西。',
+      qiuming: '难成，因名有损；利西之任，宜刑官、武职、伶官、译官。',
+      mouwang: '难成，谋中有损；秋占有喜，夏占不遂。',
+      jiaoyi: '不利，防口舌，有争竞；夏占不利，秋占有交易之财。',
+      qiuli: '无利有损，财利主口舌；秋占有财喜，夏占破财。',
+      chuxing: '不宜远行，防口舌或损失；宜西行，秋占宜行。',
+      yejian: '利行，有口舌，宜见有口舌之人。',
+      jibing: '口舌、咽喉之疾，气逆喘疾，饮食不调。',
+      guansong: '争讼不已，曲直未决，因讼有损，防刑。秋占为体得理胜讼。',
+      fenmu: '宜西向，防穴中有水，近泽之墓；夏占不宜，葬后败。',
+      fangdao: '西。',
+      wuse: '白色。',
+      wuwei: '辛、辣。',
+      shumu: '二、四、九。',
+      wuyin: '商音。'
+    },
+    li: {
+      tianshi: '日、电、虹、霓、霞、晴。',
+      dili: '南方、向阳之地、高亢之所、炉冶之所、明窗、虚室。',
+      renwu: '中女、文人、大腹人、目疾人、甲胄之士。',
+      renshi: '文化之所、聪明才学、相见虚心、书事。',
+      shenti: '目、心、上焦。',
+      shixu: '夏、午年月日时、火年月日时。',
+      dongwu: '雉、龟、鳖、蚌、蟹、螺、有壳之物。',
+      jingwu: '文书、甲胄、干戈、槁木、炉、火、干燥之物、赤色之物。',
+      wushe: '南向之居、阳明之居、明窗、虚室。',
+      jiazhai: '安稳、平善；冬占不安，克体主火灾。',
+      hunyin: '不成，利中女之婚；夏占可成，冬占不利。',
+      yinshi: '煎炒、炙煿、熟食、雉肉、甲胄之物。',
+      shengchan: '易生，冬占有损，坐宜向南。',
+      qiuming: '有名，宜南方之职、文官之任，宜炉冶坑场之职。',
+      mouwang: '可以谋望，宜文书之事。',
+      jiaoyi: '可交易，宜文书，有明验。',
+      qiuli: '有财，宜南方求，有文书之财；冬占有失。',
+      chuxing: '可行，宜动向南方，就文书之行；冬占不宜行，不宜行舟。',
+      yejian: '可见南方之人，有文书之利；秋见文书不就。',
+      jibing: '目疾、心疾、上焦、热病；夏占伏暑、时疫。',
+      guansong: '词讼明辨，易决，有文书之讼。',
+      fenmu: '南向之墓，无树木之所，阳穴；夏占出文人，冬占不利。',
+      fangdao: '南。',
+      wuse: '赤、紫。',
+      wuwei: '苦。',
+      shumu: '三、二、七。',
+      wuyin: '徵音。'
+    },
+    zhen: {
+      tianshi: '雷、雨、震、电。',
+      dili: '东方、树木繁茂之地、竹林、闹市、大途、山林之处。',
+      renwu: '长男、将帅、公门人、恶人、掌船人、木匠。',
+      renshi: '起动、怒、虚惊、鼓噪、多动少静。',
+      shenti: '足、肝、发、声音。',
+      shixu: '春、卯年月日时、木年月日时。',
+      dongwu: '龙、蛇、百虫、马鸣、蜂、鱼。',
+      jingwu: '木、竹、乐器、花草繁鲜之物、核。',
+      wushe: '东向之居、山林之处、楼阁。',
+      jiazhai: '宅中不时有虚惊；春占吉，秋占不利。',
+      hunyin: '可有成，声名之家，利长男之婚；秋占不宜婚。',
+      yinshi: '蹄、肉、山林野味、鲜味、果酸味、菜蔬。',
+      shengchan: '虚惊，胎动不安，头胎必生男；坐宜向东，秋占必有损。',
+      qiuming: '有名，宜东方之任、掌刑狱之官、茶竹木税课之职。',
+      mouwang: '可望，宜动中求；春占吉，秋占难成。',
+      jiaoyi: '可交易，宜木货；秋占不利。',
+      qiuli: '有财，宜东方求，宜动中得财；秋占不利。',
+      chuxing: '宜行，有虚惊，宜东方行；秋占不宜。',
+      yejian: '可见，有虚惊，宜见长男之人。',
+      jibing: '足疾、肝经之疾、惊恐不安。',
+      guansong: '有虚惊，行移取勘，或有讼。',
+      fenmu: '宜东方向，山林之穴，平葬；秋占出贵。',
+      fangdao: '东。',
+      wuse: '青、绿、碧。',
+      wuwei: '酸。',
+      shumu: '四、三、八。',
+      wuyin: '角音。'
+    },
+    xun: {
+      tianshi: '风、云、雨。',
+      dili: '东南方、草木茂秀之所、花果菜园、寺观。',
+      renwu: '长女、处女、寡妇、僧尼、仙道、工匠、秀士。',
+      renshi: '柔和、进退、不决、鼓舞、利市三倍。',
+      shenti: '股、肱、气、风疾。',
+      shixu: '春、辰巳年月日时、木年月日时。',
+      dongwu: '鸡、百禽、山林中之禽、虫、蛇。',
+      jingwu: '木、绳、直物、长物、竹木、工巧之器、帆、扇。',
+      wushe: '东南向之居、寺观楼台、山林之居。',
+      jiazhai: '安稳利市；春占吉，秋占不安。',
+      hunyin: '可成，宜长女之婚；秋占不利。',
+      yinshi: '鸡肉、山林之味、蔬果、酸味。',
+      shengchan: '易生，头胎产女；秋占损胎，宜向东南。',
+      qiuming: '有名，宜文职、茶课之职，宜东南之任。',
+      mouwang: '可成，有贵人助，宜谋东南。',
+      jiaoyi: '可交易，宜木货，利市三倍。',
+      qiuli: '有利，宜东南求，木货之利。',
+      chuxing: '可行，有出入之利，宜向东南行；秋占不利。',
+      yejian: '可见，有利，宜见长女、秀士。',
+      jibing: '股肱之疾、风疾、肠疾、中风、寒邪。',
+      guansong: '讼事有利，宜和，防文书之误。',
+      fenmu: '宜东南向，山林之穴；秋占不利。',
+      fangdao: '东南。',
+      wuse: '青、绿。',
+      wuwei: '酸。',
+      shumu: '五、三、八。',
+      wuyin: '角音。'
+    },
+    kan: {
+      tianshi: '雨、雪、霜、寒、水。',
+      dili: '北方、江湖、溪涧、泉井、卑湿之地、沟渎。',
+      renwu: '中男、江湖之人、舟人、盗贼、匪人。',
+      renshi: '险陷卑下、外示以柔、内怀奸诈、漂泊不成、随波逐流。',
+      shenti: '耳、血、肾。',
+      shixu: '冬、子年月日时、水年月日时。',
+      dongwu: '猪、鱼、水族、鼠。',
+      jingwu: '水、带核之物、弓轮、酒器、水具、黑色之物。',
+      wushe: '近水之居、水阁、江楼、茶酒楼。',
+      jiazhai: '不安、暗昧、防盗、水厄。',
+      hunyin: '不成，利中男之婚，宜北方之姻，不利成婚。',
+      yinshi: '猪肉、鱼、酒、冷味、海味、咸味、带核之物。',
+      shengchan: '难产、有险，宜次胎、中男，宜向北方。',
+      qiuming: '艰难，恐有灾陷；宜北方之任、鱼盐河泊之职。',
+      mouwang: '不宜谋，多阻，宜水边谋事。',
+      jiaoyi: '不成，防有失，宜水边交易。',
+      qiuli: '有失，宜水边财，防盗。',
+      chuxing: '不宜远行，宜涉舟，防盗，宜北方。',
+      yejian: '难见，宜见江湖之人。',
+      jibing: '耳痛、心疾、感寒、肾疾、胃冷、水泻。',
+      guansong: '不利，有阴险，失理。',
+      fenmu: '宜北向，近水之穴，防水中。',
+      fangdao: '北。',
+      wuse: '黑。',
+      wuwei: '咸。',
+      shumu: '六、一、九。',
+      wuyin: '羽音。'
+    },
+    gen: {
+      tianshi: '云、雾、山岚。',
+      dili: '东北方、山径、丘陵、坟墓、近石之所。',
+      renwu: '少男、童子、闲人、山中人、僧道。',
+      renshi: '阻隔、守静、进退不决、反背、止住。',
+      shenti: '手指、骨、鼻、背。',
+      shixu: '冬春之交、丑寅年月日时、土年月日时。',
+      dongwu: '狗、虎、鼠、狐、黔喙之属。',
+      jingwu: '土石、瓜果、黄物、土中之物、藤生之物、门阙。',
+      wushe: '东北向之居、山居、近石之居、楼阁。',
+      jiazhai: '安稳，诸事有阻；春占不安。',
+      hunyin: '阻隔难成，成亦迟；利少男之婚，宜对门。',
+      yinshi: '土中之物、野味、果、菜蔬。',
+      shengchan: '难产、有阻，宜向东北；春占不利。',
+      qiuming: '阻隔不遂，宜东北之任、山城之职。',
+      mouwang: '难成、有阻，宜安静守旧。',
+      jiaoyi: '难成，宜山林之物。',
+      qiuli: '求财阻隔，宜山林之利；春占不吉。',
+      chuxing: '不宜远行，有阻，宜东北行，宜近山。',
+      yejian: '难见、有阻，宜见山林之人。',
+      jibing: '手指、骨、鼻之疾，脾胃之疾。',
+      guansong: '有阻，未决。',
+      fenmu: '宜东北向，山穴，防石。',
+      fangdao: '东北。',
+      wuse: '黄。',
+      wuwei: '甘。',
+      shumu: '七、五、十。',
+      wuyin: '宫音。'
+    },
+    kun: {
+      tianshi: '阴、云、雾、雨。',
+      dili: '西南方、田野、乡村、平地、大舆。',
+      renwu: '老母、后母、农夫、乡人、众人、大腹人。',
+      renshi: '吝啬、柔顺、懦弱、众多、载物。',
+      shenti: '腹、脾、胃、肉。',
+      shixu: '辰戌丑未月、四季、土年月日时。',
+      dongwu: '牛、牝牛、子母牛、百兽。',
+      jingwu: '土、方物、瓦器、布帛、丝绵、五谷、车、釜。',
+      wushe: '西南向之居、村居、田舍、矮屋、土阶。',
+      jiazhai: '安稳，多阴气；春占宅舍不安。',
+      hunyin: '利婚，宜寡妇，宜乡村；春占不利。',
+      yinshi: '牛肉、土中之物、甘味、五谷、野味。',
+      shengchan: '易产，春占难产、有损，或不利于母，坐宜西南。',
+      qiuming: '有名，宜西南方、教职、农官、乡官。',
+      mouwang: '可谋，宜静中求；春占不遂。',
+      jiaoyi: '利于交易，宜田土交易、五谷之利。',
+      qiuli: '有财，宜西南求，土产之利；春占少利。',
+      chuxing: '可行，宜西南行；春占不宜。',
+      yejian: '可见，宜见乡人、老母。',
+      jibing: '腹疾、脾胃之疾、饮食停滞。',
+      guansong: '理顺，得众情，讼当解散。',
+      fenmu: '宜西南向，平洋之穴，宜低葬；春占吉。',
+      fangdao: '西南。',
+      wuse: '黄、黑。',
+      wuwei: '甘。',
+      shumu: '八、五、十。',
+      wuyin: '宫音。'
+    }
+  };
+
+  // 事物分类，对应「占问」下拉，用于把类象落到具体问题上
+  const TOPICS = [
+    { key: 'zonghe', name: '综合', xiang: ['renshi'] },
+    { key: 'shiye', name: '事业·求谋', xiang: ['renwu', 'renshi', 'mouwang', 'qiuming'] },
+    { key: 'caifu', name: '财运·交易', xiang: ['jiaoyi', 'qiuli', 'jingwu'] },
+    { key: 'ganqing', name: '感情·婚姻', xiang: ['hunyin', 'renwu'] },
+    { key: 'jiankang', name: '疾病·健康', xiang: ['jibing', 'shenti'] },
+    { key: 'chuxing', name: '出行·行人', xiang: ['chuxing', 'dili'] },
+    { key: 'shiwu', name: '失物·寻人', xiang: ['jingwu', 'fangdao', 'dili'] },
+    { key: 'guansong', name: '官讼·是非', xiang: ['guansong', 'renshi'] },
+    { key: 'xueye', name: '学业·考试', xiang: ['qiuming', 'renshi'] },
+    { key: 'jiating', name: '家宅·屋舍', xiang: ['jiazhai', 'wushe'] }
+  ];
+
+  global.MHXiang = {
+    CATEGORIES: CATEGORIES,
+    XIANG: XIANG,
+    TOPICS: TOPICS
+  };
+})(typeof window !== 'undefined' ? window : globalThis);
+</script>
+<script>
+/*!
+ * 梅花易数 · 断诀与卦例
+ * 原文据《增广校正梅花易数》（宋·邵雍撰，九州出版社 2007）整理
+ */
+(function (global) {
+  'use strict';
+
+  const TIJONG = [
+    {
+      title: '体用总诀',
+      text: '体用之说，动静之机，八卦主宾，五行生克。体为己身之兆，用为应事之端。体宜受卦之生，用宜见卦体之克。体盛则吉，体衰则凶。用克体固不宜，体生用亦非利。'
+    },
+    {
+      title: '体党用党',
+      text: '体党多而体势盛，用党多则体势衰。如卦体是金，而互变皆金，则是体之党多；如用卦是金，而互变皆金，则是用之党多。体生用，为之泄气，如夏火逢土，亦泄气。'
+    },
+    {
+      title: '互变之应',
+      text: '体用之间，比和则吉。互乃中间之应，变乃末后之期。故用吉变凶者，先吉后凶；用凶变吉者，先凶后吉。'
+    },
+    {
+      title: '生克吉凶',
+      text: '体克用，诸事吉；用克体，诸事凶。体生用，有耗失之患；用生体，有进益之喜。体用比和，则百事顺遂。'
+    }
+  ];
+
+  const SHENG_TI = {
+    qian: '乾卦生体，则主公门中有喜益，或功名上有喜，或因官有财，或问讼得理，或有金宝之利，或老人上进财，或尊长惠送，或有官贵之喜。',
+    kun: '坤卦生体，主有田土之喜，或于田土进财，或得乡人之益，或得阴人之利，或有果谷之进，或有布帛之喜。',
+    zhen: '震卦生体，则主山林之益，或因山林得财，或进东方之财，或因动中有喜，或木货交易之利，或因草木氏人称心。',
+    xun: '巽卦生体，亦主山林之益，或因山林得财，或于东南得财，或因草木姓人而进利，或以茶果得利，或茶果菜蔬馈送之喜。',
+    kan: '坎卦生体，有北方之喜，或受北方之财，或水边人进财，或因点水人称心，或因鱼盐酒货文书交易之利，或有馈送鱼盐酒之喜。',
+    li: '离卦生体，主有南方之财，或有文书之喜，或有炉冶场之喜，或因火姓人而得财。',
+    gen: '艮卦生体，有东北方之财，或山田之喜，或因山林田土获财，或宫音带土人之财。物当安稳，事有终始。',
+    dui: '兑卦生体，有西方之财，或喜悦事，或食物玉金货利之源，或商音之人，或带口之人欣逢，或主宾之乐，或朋友讲习之事。'
+  };
+
+  const KE_TI = {
+    qian: '乾卦克体，主有公事之扰，或门户之扰，或有财宝之失，或于金谷有损，或有怒于尊长，或得罪于贵人。',
+    kun: '坤卦克体，主有田土之扰，或于田土有损，或有小人之害，或有阴人之侵，或失布帛之财，或丧谷粟之利。',
+    zhen: '震卦克体，主有虚惊，常多恐惧，或身心不能安静，或家宅见妖灾，或草木姓氏之人相侵，或于山林有所失。',
+    xun: '巽卦克体，亦有草木姓人相害，或于山林上生忧。谋事，乃东南方之人；处家，忌阴人小口之厄。',
+    kan: '坎卦克体，主有险陷之事，或寇盗之忧，或失意于水边人，或生灾于酒后，或点水人相害，或北方人见殃。',
+    li: '离卦克体，主文书之扰，或失火之惊，或有南方之忧，或火人相害。',
+    gen: '艮卦克体，诸事多违，百谋中阻。或有山林田土之失，或带土人相侵，防东北方之祸害，或忧坟墓不当安稳。',
+    dui: '兑卦克体，不利西方，主口舌事之纷争。或带口人侵欺，或有毁折之患，或因饮食而生忧。'
+  };
+
+  // 十八占口诀（据卷二「十八占」）
+  const TOPIC_RULES = {
+    zonghe: {
+      name: '人事',
+      basis: '占人事，详观体用。体卦为主，用卦为宾。',
+      byRel: {
+        shengTi: '用生体，有进益之喜。',
+        bihe: '体用比和，谋为吉利。',
+        tiKe: '体克用则吉，事在掌握。',
+        tiSheng: '体生用，有耗失之患。',
+        yongKe: '用克体不宜，事多阻逆。'
+      }
+    },
+    shiye: {
+      name: '求谋',
+      basis: '占求谋，以体为主，用为所谋之应。',
+      byRel: {
+        shengTi: '用生体，不谋而成。',
+        bihe: '体用比和，求谋称意。',
+        tiKe: '体克用，谋虽可成，但成迟。',
+        tiSheng: '体生用，多谋少遂。',
+        yongKe: '用克体，求谋不成，谋亦有害。'
+      }
+    },
+    xueye: {
+      name: '求名',
+      basis: '占求名，以体为主，用为名。',
+      byRel: {
+        shengTi: '用生体，名易成，或因名有得。',
+        bihe: '体用比和，功名称意。',
+        tiKe: '体克用，名可成，但成迟。',
+        tiSheng: '体生用，名不可就，或因名有丧。',
+        yongKe: '用克体，名不可成。'
+      }
+    },
+    caifu: {
+      name: '求财',
+      basis: '占求财，以体为主，以用为财。',
+      byRel: {
+        shengTi: '用生体，财有进益之喜。',
+        bihe: '体用比和，财利快意。',
+        tiKe: '体克用，有财。',
+        tiSheng: '体生用，财有损耗之忧。',
+        yongKe: '用克体，无财。'
+      }
+    },
+    ganqing: {
+      name: '婚姻',
+      basis: '占婚姻，以体为主，用为婚姻。体为所占之家，用为所婚之家。',
+      byRel: {
+        shengTi: '用生体，婚易成，或因婚有得。',
+        bihe: '体用比和，婚姻吉利。',
+        tiKe: '体克用，可成，但成之迟。',
+        tiSheng: '体生用，婚难成，或因婚有失。',
+        yongKe: '用克体，不可成，成亦有害。'
+      }
+    },
+    jiankang: {
+      name: '疾病',
+      basis: '占疾病，以体为病人，用为病症。体卦宜旺不宜衰，体宜逢生，不宜见克。',
+      byRel: {
+        shengTi: '用生体，即愈。',
+        bihe: '体用比和，疾病易安。',
+        tiKe: '体克用，病宜安，勿药有喜。',
+        tiSheng: '体生用，病难愈，迁延难好。',
+        yongKe: '用克体，虽药无功。'
+      }
+    },
+    chuxing: {
+      name: '出行',
+      basis: '占出行，以体为主，用为所行之应。',
+      byRel: {
+        shengTi: '用生体，有意外之财。',
+        bihe: '体用比和，出行顺快。',
+        tiKe: '体克用，可行，所至多得意。',
+        tiSheng: '体生用，出行有破耗之失。',
+        yongKe: '用克体，出则有祸。'
+      }
+    },
+    shiwu: {
+      name: '失物',
+      basis: '占失物，以体为主，用为失物。又以变卦为失物之所在。',
+      byRel: {
+        shengTi: '用生体，物易寻。',
+        bihe: '体用比和，物不失矣。',
+        tiKe: '体克用，可寻迟得。',
+        tiSheng: '体生用，物难见。',
+        yongKe: '用克体，不可寻。'
+      }
+    },
+    guansong: {
+      name: '官讼',
+      basis: '占官讼，以体为主，用为对辞之人与官讼之应。体卦宜旺，用卦宜衰。',
+      byRel: {
+        shengTi: '用生体，不正得理，或因讼有所得。',
+        bihe: '体用比和，官讼最吉，必有主和之义。',
+        tiKe: '体克用者，己胜人。',
+        tiSheng: '体生用，非为失理，或因官有所丧。',
+        yongKe: '用克体者，人胜己。'
+      }
+    },
+    jiating: {
+      name: '家宅',
+      basis: '占家宅，以体为主，用为家宅。',
+      byRel: {
+        shengTi: '用生体，多进益，或有馈送之喜。',
+        bihe: '体用比和，家宅安稳。',
+        tiKe: '体克用，则家宅多吉。',
+        tiSheng: '体生用，多耗散，或防失盗之忧。',
+        yongKe: '用克体，则家宅多凶。'
+      }
+    }
+  };
+
+  // 卦气旺衰（卷一）
+  const QI = {
+    wang: '震、巽木旺于春；离火旺于夏；乾、兑金旺于秋；坎水旺于冬；坤、艮土旺于辰戌丑未月。',
+    shuai: '春坤、艮；夏乾、兑；秋震、巽；冬离；辰戌丑未坎。'
+  };
+
+  const SHENGKE = {
+    sheng: '金生水，水生木，木生火，火生土，土生金。',
+    ke: '金克木，木克土，土克水，水克火，火克金。'
+  };
+
+  const METHOD_TEXTS = [
+    {
+      title: '卦以八除，爻以六除',
+      text: '凡起卦不问数多少，即以八作卦数。过八数，即以八数退除，以零数作卦；如得八数整，即坤卦，更不必除也。凡起动爻，以重卦总数除六，以零数作动；如不满六，止用此数为动爻；如过六数，则除之一六，不尽再除二六、三六，直至除尽，以零数作动爻。'
+    },
+    {
+      title: '年月日时起卦',
+      text: '年月日为上卦，年月日加时总数为下卦，又以年月日时总数取爻。子年一数，丑年二数，直至亥年十二数；月如正月一数，直至十二月亦作十二数；日如初一数，直至三十日为三十数；时如子时一数，直至亥时为十二数。'
+    },
+    {
+      title: '物数占',
+      text: '凡见有可数之物，即以此数起作上卦，以时数配作下卦，即以卦数并时数总除六取动爻。'
+    },
+    {
+      title: '声音占',
+      text: '凡闻声音，数得几数，起作上卦，加时数配作下卦。如闻动物鸣叫之声，或闻人敲击之声，皆可作数起卦。'
+    },
+    {
+      title: '字占',
+      text: '凡见字数如停匀，即平分一半为上卦，一半为下卦；如字数不匀，即少一字为上卦，取天轻清之义，以多一字为下卦，取地重浊之义。'
+    },
+    {
+      title: '为人占',
+      text: '凡为人占，其例不一：或听语声起卦，或观其人品，或取诸身，或取诸物，或因其服色，触其外物，或以年月日时，或以书写来意。'
+    },
+    {
+      title: '端法后天起卦',
+      text: '后天端法：以物为上卦，方位为下卦，合物卦之数与方卦之数，加时数以取动爻。'
+    },
+    {
+      title: '应期迟速',
+      text: '凡占卜，克应之期看自己之动静，以决事之迟速。故行则应速，以遂成卦之数中分而取其半也；坐则事应迟，当倍其成卦之数而定之也；立则半迟半速，止以成卦之数定之可也。'
+    }
+  ];
+
+  // 占例：cast 用于复原卦盘
+  const CASES = [
+    {
+      id: 'guanmei',
+      title: '观梅占',
+      subtitle: '见二雀争枝坠地',
+      cast: { upper: 'dui', lower: 'li', moving: 1, timeNum: 9, timeUsed: true, monthBranch: '丑' },
+      lines: [
+        '辰年十二月十七日申时，康节先生偶观梅，见二雀争枝坠地。先生曰：“不动不占，不因事不占。今二雀争枝坠地，怪也。”',
+        '因占之：辰年五数，十二月十二数，十七日十七数，共三十四数，除四八三十二，得二，属兑，为上卦；加申时九数，总得四十三数，五八除四十，零得三数，为离，作下卦；又上下总四十三数，以六除，六七除四十二，余一为动爻，是为泽火革。初爻变咸，互见乾巽。'
+      ],
+      verdict: '明晚当有女子折花，园丁不知而逐之，女子失惊坠地，遂伤其股。',
+      analysis: [
+        '兑金为体，离火克之——用克体，故有伤。',
+        '互中巽木，又逢乾金、兑金克之，巽木被伤；巽为股，故伤在股。',
+        '兑为少女，故应在女子。',
+        '幸而初爻变出艮土，艮土生兑金，体卦得生，故但伤而不至凶危。'
+      ],
+      lesson: '此例可见「体用生克定吉凶，互卦看中间，变卦看终局」；又须以卦象（兑少女、巽股）落实人事。'
+    },
+    {
+      id: 'mudan',
+      title: '牡丹占',
+      subtitle: '因问而占，明日花毁',
+      cast: { upper: 'qian', lower: 'xun', moving: 5, timeNum: 4, timeUsed: true, monthBranch: '辰' },
+      lines: [
+        '巳年三月十六日卯时，先生与客往司马公家共观牡丹。时值花开甚盛，客曰：“花盛如此，亦有数乎？”先生曰：“莫不有数。且因问而可占矣。”',
+        '遂占之：以巳年六数，三月三数，十六日十六数，总得二十五数，除三八二十四数，零一数为乾，为上卦；加卯时四数，共得二十九数，又除三八二十四，得零五为巽卦，作下卦，得天风姤；又以总计二十九数，以六除之，四六除二十四，得零五爻动，变鼎卦，互见重乾。'
+      ],
+      verdict: '此花明日午时，当为马所践毁。次日午时，果有贵官观牡丹，二马相啮，群至花间驰骤，花尽为之践毁。',
+      analysis: [
+        '巽木为体，乾金克之，互卦又见重乾，克体之卦多，卦中无生意，故知牡丹必毁。',
+        '乾为马，故知马践。',
+        '午时者，离明之象；离为日、为午，故应午时。'
+      ],
+      lesson: '克体之卦多而无生扶，事必败；应期可取卦象所主之时（乾马、离午）。'
+    },
+    {
+      id: 'koumen',
+      title: '邻夜扣门借物占',
+      subtitle: '一声、五声，借斧',
+      cast: { upper: 'qian', lower: 'xun', moving: 4, timeNum: 10, timeUsed: true, monthBranch: '子' },
+      lines: [
+        '冬夕酉时，先生方拥炉，有扣门者，初扣一声而止，继而又扣五声，且云借物。先生令勿言，令其子占之，试所借何物。',
+        '以一声属乾为上卦，以五声属巽为下卦；又以一乾五巽共六数，加酉时数，共得十六数，以六除之，二六除十二，得天风姤，第四爻变巽卦，互见重乾。'
+      ],
+      verdict: '金短木长者，器也；所借必斧。问之，果借斧。',
+      analysis: [
+        '卦中三乾金、二巽木，为金木之物。',
+        '乾金短而巽木长，故为斧（锄亦金木，然夕晚安用锄？以理推之，必斧）。',
+        '先生曰：“起数又须明理。以卦推之，斧亦可也，锄亦可也；以理推之，夕晚安用锄？必借斧。”'
+      ],
+      lesson: '数不离理。卦象给出范围，事理决定取舍——这是梅花易数“心易”的关键。'
+    },
+    {
+      id: 'dongjing',
+      title: '今日动静如何',
+      subtitle: '六字占，有人相请',
+      cast: { upper: 'kun', lower: 'xun', moving: 1, timeNum: 0, timeUsed: false },
+      lines: [
+        '有客问曰：“今日动静如何？”遂将此六字占之。',
+        '以平分“今日动”三字为上卦：“今”平声，一数；“日”入声，四数；“动”去声，三数，共八数，得坤为上卦。以“静如何”为下卦：“静”去声，三数；“如”平声，一数；“何”平声，一数，共五数，得巽为下卦。又以八五总为十三数，除二六一十二，零得一数，为地风升。初爻动，变泰卦，互见震、兑。'
+      ],
+      verdict: '今日有人相请，客不多，酒不醉，味止鸡黍而已。至晚果然。',
+      analysis: [
+        '升者，有升阶之义；互震、兑，有东西席之分。',
+        '兑为口，坤为腹，有口腹之事，故知有人相请。',
+        '客不多者，坤土独立，无同类之卦气。',
+        '酒不醉者，卦中无坎；味止鸡黍者，坤为黍稷。'
+      ],
+      lesson: '字占可用平仄取数；断卦须把卦象逐一落到具体事物，不可只说吉凶。'
+    },
+    {
+      id: 'laoren',
+      title: '老人有忧色占',
+      subtitle: '途行见老人，五日内祸',
+      cast: { upper: 'qian', lower: 'xun', moving: 4, timeNum: 4, timeUsed: true },
+      lines: [
+        '己丑日卯时，偶在途行，有老人往巽方，有忧色。问其何以有忧，曰无。怪而占之。',
+        '以老人属乾为上卦，巽方为下卦，是天风姤；又以乾一、巽五之数，加卯时四数，总十数，除六得四为动爻，是为天风姤之九四。《易》曰：“包无鱼，凶。”'
+      ],
+      verdict: '汝于五日内谨慎出入，恐有重祸。果五日，此老赴吉席，因鱼骨而终。',
+      analysis: [
+        '巽木为体，乾金克之，互卦又见重乾，俱是克体，并无生气。',
+        '时在途行，其应速，故以成卦之数十，中分取半为五日。',
+        '爻辞“包无鱼，凶”，亦见凶兆。'
+      ],
+      lesson: '同一卦（天风姤）可因所问不同而断不同之事；应期须结合行、立、坐之动静。'
+    },
+    {
+      id: 'shaonian',
+      title: '少年有喜色占',
+      subtitle: '离方来，十七日定亲',
+      cast: { upper: 'gen', lower: 'li', moving: 5, timeNum: 7, timeUsed: true },
+      lines: [
+        '壬申日午时，有少年从离方来，喜形于色。问其有何喜，曰无。遂占之。',
+        '以少年属艮为上卦，离为下卦，得山火贲；以艮七、离三加午时七，总十七数，除十二，得零五为动，是为贲之六五。爻曰：“贲于丘园，束帛戋戋，吉。”'
+      ],
+      verdict: '子于十七日内必有聘币之喜。至期果然定亲。',
+      analysis: [
+        '易辞已吉；卦则贲之家人，互见震、坎。',
+        '离为体，互、变俱生之，故吉。',
+        '成卦之数十七，即应十七日。'
+      ],
+      lesson: '互变生体者，事有始终之助；应期可直接取成卦之数。'
+    }
+  ];
+
+  // 三要十应（卷三）
+  const WAIYING = {
+    intro: '三要者，耳、目、心也。耳之所闻、目之所见、心之所思，三者相契，吉凶之兆见焉。十应者，以体卦为主，随所见所闻之应卦为用，合内外而断之。',
+    items: [
+      ['天时', '晴明为乾，雨雪为坎，雷风为震巽，日电为离，阴晦为坤艮。'],
+      ['地理', '茂树秀竹为震，江湖溪涧为坎，窑灶为离，岩穴为艮，高亢为乾，田野为坤。'],
+      ['人事', '老人属乾，老妇属坤，少男为艮，少女为兑，或不论卦象而随其吉凶。'],
+      ['时令', '寅卯木旺，巳午火旺，申酉金旺，亥子水旺，辰戌丑未土旺；生体宜旺，克体宜衰。'],
+      ['方卦', '离南、坎北、震东、兑西、巽东南、乾西北、艮东北、坤西南，看来人方位。'],
+      ['动物', '乾马、坤牛、震龙、巽鸡、坎豕、离雉、艮狗、兑羊；鸦报灾、鹊报喜。'],
+      ['静物', '圆者事成，缺者事败；笔砚主文书，袍笏主官职，枷锁防官灾。'],
+      ['言语', '闻吉语则吉，闻凶语则凶；所言之事，即所占之事。'],
+      ['声音', '雷为震、风为巽、雨为坎；欢笑主喜，悲愁主忧，怒号主争。'],
+      ['五色', '青碧绿属木，红紫赤属火，白属金，黑属水，黄属土。'],
+      ['写字', '字画之应，观其笔画、墨色、位置，以配卦象五行。']
+    ],
+    neiwai: '凡占卜，体用为内，诸应卦为外卦。内卦不吉而外卦吉，可以解其不吉；内卦吉而外卦不吉，反破其吉。内外俱吉则断然吉，俱凶则断然凶。',
+    xiangbei: '向者，事物之应相向而来；背者，相背而去。来则应至，去则应过。',
+    dongjing: '坐则应迟，行则应速，走则愈速，卧则愈迟。'
+  };
+
+  // 八卦取象歌
+  const XIANG_SONG = '乾三连，坤六断，震仰盂，艮覆碗，离中虚，坎中满，兑上缺，巽下断。';
+
+  global.MHLearn = {
+    TIJONG: TIJONG,
+    SHENG_TI: SHENG_TI,
+    KE_TI: KE_TI,
+    TOPIC_RULES: TOPIC_RULES,
+    QI: QI,
+    SHENGKE: SHENGKE,
+    METHOD_TEXTS: METHOD_TEXTS,
+    CASES: CASES,
+    WAIYING: WAIYING,
+    XIANG_SONG: XIANG_SONG
+  };
+})(typeof window !== 'undefined' ? window : globalThis);
+</script>
+<script>
+/*!
+ * 梅花易数 · 历法工具
+ * 农历换算、干支、时辰、节气月建
+ */
+(function (global) {
+  'use strict';
+
+  const STEMS = ['甲', '乙', '丙', '丁', '戊', '己', '庚', '辛', '壬', '癸'];
+  const BRANCHES = ['子', '丑', '寅', '卯', '辰', '巳', '午', '未', '申', '酉', '戌', '亥'];
+  const CN_NUM = ['零', '一', '二', '三', '四', '五', '六', '七', '八', '九', '十'];
+  const LUNAR_MONTHS = { '正': 1, '一': 1, '二': 2, '三': 3, '四': 4, '五': 5, '六': 6, '七': 7, '八': 8, '九': 9, '十': 10, '冬': 11, '十一': 11, '腊': 12, '十二': 12 };
+
+  const SHICHEN = [
+    { index: 1, branch: '子', name: '子时', range: '23:00–01:00', hours: [23, 0] },
+    { index: 2, branch: '丑', name: '丑时', range: '01:00–03:00', hours: [1, 2] },
+    { index: 3, branch: '寅', name: '寅时', range: '03:00–05:00', hours: [3, 4] },
+    { index: 4, branch: '卯', name: '卯时', range: '05:00–07:00', hours: [5, 6] },
+    { index: 5, branch: '辰', name: '辰时', range: '07:00–09:00', hours: [7, 8] },
+    { index: 6, branch: '巳', name: '巳时', range: '09:00–11:00', hours: [9, 10] },
+    { index: 7, branch: '午', name: '午时', range: '11:00–13:00', hours: [11, 12] },
+    { index: 8, branch: '未', name: '未时', range: '13:00–15:00', hours: [13, 14] },
+    { index: 9, branch: '申', name: '申时', range: '15:00–17:00', hours: [15, 16] },
+    { index: 10, branch: '酉', name: '酉时', range: '17:00–19:00', hours: [17, 18] },
+    { index: 11, branch: '戌', name: '戌时', range: '19:00–21:00', hours: [19, 20] },
+    { index: 12, branch: '亥', name: '亥时', range: '21:00–23:00', hours: [21, 22] }
+  ];
+
+  // 以近似日期固定节气交接（误差约一日，可在界面手动改月建）
+  const TERMS = [
+    { month: 1, day: 6, branch: '丑', name: '小寒' },
+    { month: 2, day: 4, branch: '寅', name: '立春' },
+    { month: 3, day: 6, branch: '卯', name: '惊蛰' },
+    { month: 4, day: 5, branch: '辰', name: '清明' },
+    { month: 5, day: 6, branch: '巳', name: '立夏' },
+    { month: 6, day: 6, branch: '午', name: '芒种' },
+    { month: 7, day: 7, branch: '未', name: '小暑' },
+    { month: 8, day: 8, branch: '申', name: '立秋' },
+    { month: 9, day: 8, branch: '酉', name: '白露' },
+    { month: 10, day: 8, branch: '戌', name: '寒露' },
+    { month: 11, day: 7, branch: '亥', name: '立冬' },
+    { month: 12, day: 7, branch: '子', name: '大雪' }
+  ];
+
+  const BRANCH_WUXING = {
+    子: '水', 丑: '土', 寅: '木', 卯: '木', 辰: '土', 巳: '火',
+    午: '火', 未: '土', 申: '金', 酉: '金', 戌: '土', 亥: '水'
+  };
+
+  function pad(n) { return n < 10 ? '0' + n : '' + n; }
+
+  function dayName(n) {
+    const tens = ['初', '十', '廿', '三'];
+    if (n === 10) return '初十';
+    if (n === 20) return '二十';
+    if (n === 30) return '三十';
+    const t = Math.floor(n / 10);
+    const u = n % 10;
+    return tens[t] + CN_NUM[u];
+  }
+
+  // 农历：优先使用 Intl 中国历；不支持时返回 null，由界面转为手动输入
+  const LUNAR_FMT = (function () {
+    try {
+      return new Intl.DateTimeFormat('zh-CN-u-ca-chinese', {
+        year: 'numeric', month: 'long', day: 'numeric'
+      });
+    } catch (e) {
+      return null;
+    }
+  })();
+
+  function toLunar(date) {
+    if (!LUNAR_FMT) return null;
+    let parts;
+    try {
+      parts = LUNAR_FMT.formatToParts(date);
+    } catch (e) {
+      return null;
+    }
+    let yearName = '';
+    let monthText = '';
+    let dayNum = 0;
+    let relatedYear = 0;
+    parts.forEach(function (p) {
+      if (p.type === 'yearName') yearName = p.value;
+      else if (p.type === 'month') monthText = p.value;
+      else if (p.type === 'day') dayNum = parseInt(p.value, 10);
+      else if (p.type === 'relatedYear') relatedYear = parseInt(p.value, 10);
+    });
+    if (!monthText || !dayNum) return null;
+    const isLeap = monthText.indexOf('闰') === 0;
+    const bare = monthText.replace('闰', '').replace('月', '');
+    const month = LUNAR_MONTHS[bare] || 0;
+    if (!month) return null;
+    const branchChar = yearName.charAt(1);
+    const branchIndex = BRANCHES.indexOf(branchChar) + 1;
+    return {
+      year: relatedYear,
+      yearGanZhi: yearName,
+      yearBranch: branchChar,
+      yearBranchNum: branchIndex || 1,
+      month: month,
+      monthName: monthText,
+      isLeap: isLeap,
+      day: dayNum,
+      dayName: dayName(dayNum),
+      text: yearName + '年' + monthText + dayName(dayNum),
+      source: 'intl'
+    };
+  }
+
+  // 手工农历（界面回退时使用）
+  function manualLunar(yearGanZhi, month, day, isLeap) {
+    const branchChar = yearGanZhi.charAt(1);
+    return {
+      year: 0,
+      yearGanZhi: yearGanZhi,
+      yearBranch: branchChar,
+      yearBranchNum: BRANCHES.indexOf(branchChar) + 1,
+      month: month,
+      monthName: (isLeap ? '闰' : '') + (month === 1 ? '正' : month === 11 ? '冬' : month === 12 ? '腊' : CN_NUM[month]) + '月',
+      isLeap: !!isLeap,
+      day: day,
+      dayName: dayName(day),
+      text: yearGanZhi + '年' + (isLeap ? '闰' : '') + (month === 1 ? '正' : month === 11 ? '冬' : month === 12 ? '腊' : CN_NUM[month]) + '月' + dayName(day),
+      source: 'manual'
+    };
+  }
+
+  function shichenOf(hour) {
+    for (let i = 0; i < SHICHEN.length; i += 1) {
+      if (SHICHEN[i].hours.indexOf(hour) >= 0) return SHICHEN[i];
+    }
+    return SHICHEN[0];
+  }
+
+  function shichenByIndex(index) {
+    return SHICHEN[((index - 1) % 12 + 12) % 12];
+  }
+
+  // 节气月建
+  function monthJian(date) {
+    const y = date.getFullYear();
+    const m = date.getMonth() + 1;
+    const d = date.getDate();
+    const t = date.getHours() * 60 + date.getMinutes();
+    let current = TERMS[0];
+    let currentYear = y;
+    let bestVal = -Infinity;
+    for (let dy = -1; dy <= 0; dy += 1) {
+      const yy = y + dy;
+      TERMS.forEach(function (term) {
+        const val = new Date(yy, term.month - 1, term.day, 0, 0, 0).getTime();
+        if (val <= date.getTime() && val > bestVal) {
+          bestVal = val;
+          current = term;
+          currentYear = yy;
+        }
+      });
+    }
+    // 边界：1 月 1–5 日属上年大雪之子月
+    if (m === 1 && d < 6) {
+      current = TERMS[11];
+      currentYear = y - 1;
+    }
+    const branch = current.branch;
+    return {
+      branch: branch,
+      wuxing: BRANCH_WUXING[branch],
+      term: current.name,
+      year: currentYear,
+      name: branch + '月',
+      text: current.name + '后（' + branch + '月）'
+    };
+  }
+
+  function formatDate(date) {
+    return date.getFullYear() + '年' + pad(date.getMonth() + 1) + '月' + pad(date.getDate()) + '日 ' + pad(date.getHours()) + ':' + pad(date.getMinutes());
+  }
+
+  // 公历日期加一天（用于晚子时）
+  function addDays(date, n) {
+    const d = new Date(date.getTime());
+    d.setDate(d.getDate() + n);
+    return d;
+  }
+
+  global.MHLunar = {
+    STEMS: STEMS,
+    BRANCHES: BRANCHES,
+    SHICHEN: SHICHEN,
+    BRANCH_WUXING: BRANCH_WUXING,
+    toLunar: toLunar,
+    manualLunar: manualLunar,
+    shichenOf: shichenOf,
+    shichenByIndex: shichenByIndex,
+    monthJian: monthJian,
+    dayName: dayName,
+    formatDate: formatDate,
+    addDays: addDays
+  };
+})(typeof window !== 'undefined' ? window : globalThis);
+</script>
+<script>
+/*!
+ * 梅花易数 · 排盘与断卦引擎
+ * 起卦 / 互变 / 体用 / 旺衰 / 应期 / 断语
+ */
+(function (global) {
+  'use strict';
+
+  const D = global.MHData;
+  const L = global.MHLunar;
+
+  const SHENG = { 木: '火', 火: '土', 土: '金', 金: '水', 水: '木' };
+  const KE = { 木: '土', 土: '水', 水: '火', 火: '金', 金: '木' };
+
+  const REL = {
+    shengTi: {
+      key: 'shengTi', label: '用生体', short: '用生体',
+      score: 3, tone: '吉',
+      text: '用卦生体，主有进益之喜，事得人助，谋望可成，求财有得。'
+    },
+    bihe: {
+      key: 'bihe', label: '体用比和', short: '比和',
+      score: 2, tone: '吉',
+      text: '体用比和，百事顺遂，谋为如意，虽无大利，亦无大害。'
+    },
+    tiKe: {
+      key: 'tiKe', label: '体克用', short: '体克用',
+      score: 1, tone: '小吉',
+      text: '体克用卦，事在掌握，然而须费心力，成之稍迟；体旺则吉，体衰则难。'
+    },
+    tiSheng: {
+      key: 'tiSheng', label: '体生用', short: '体生用',
+      score: -1, tone: '小凶',
+      text: '体卦生用，主耗泄损折，谋事费力而所得有限；宜守不宜进，防有虚耗。'
+    },
+    yongKe: {
+      key: 'yongKe', label: '用克体', short: '用克体',
+      score: -3, tone: '凶',
+      text: '用卦克体，主阻隔忧疑、损耗是非；事多不顺，宜谨慎退守，不可强求。'
+    }
+  };
+
+  const BIAN_TEXT = {
+    shengTi: '变卦生体，终局有助，先难后易，事至末后当有转机。',
+    bihe: '变卦与体比和，终局平顺，谋为如意，虽无大利亦无大害。',
+    tiKe: '变卦受体制，终局可控，事在掌握，然须费力而迟成。',
+    tiSheng: '变卦泄体，终局耗损，宜守不宜进，防末后有失。',
+    yongKe: '变卦克体，终局有阻，须防后患，不可不虑。'
+  };
+
+  const WANG = {
+    旺: { state: '旺', score: 1.2, desc: '得时当令，气势方盛' },
+    相: { state: '相', score: 0.6, desc: '得月令之生，气势渐旺' },
+    休: { state: '休', score: -0.4, desc: '生月令而泄气，力量平平' },
+    囚: { state: '囚', score: -1.0, desc: '受月令之克，受制无力' },
+    死: { state: '死', score: -1.4, desc: '为月令所克，气势衰绝' }
+  };
+
+  const YING_BRANCH = {
+    金: ['申', '酉'], 木: ['寅', '卯'], 水: ['亥', '子'], 火: ['巳', '午'], 土: ['辰', '戌', '丑', '未']
+  };
+  const YING_SEASON = { 金: '秋', 木: '春', 水: '冬', 火: '夏', 土: '四季月' };
+
+  function mod(n, m) {
+    const r = n % m;
+    return r === 0 ? m : r;
+  }
+
+  function relationOf(tiEl, otherEl) {
+    if (tiEl === otherEl) return 'bihe';
+    if (SHENG[otherEl] === tiEl) return 'shengTi';
+    if (SHENG[tiEl] === otherEl) return 'tiSheng';
+    if (KE[tiEl] === otherEl) return 'tiKe';
+    if (KE[otherEl] === tiEl) return 'yongKe';
+    return 'bihe';
+  }
+
+  function wangShuai(el, monthEl) {
+    if (el === monthEl) return WANG['旺'];
+    if (SHENG[monthEl] === el) return WANG['相'];
+    if (SHENG[el] === monthEl) return WANG['休'];
+    if (KE[el] === monthEl) return WANG['囚'];
+    return WANG['死'];
+  }
+
+  function yaoName(lines, index) {
+    const yang = lines[index - 1] === 1;
+    const prefix = yang ? '九' : '六';
+    if (index === 1) return '初' + prefix;
+    if (index === 6) return '上' + prefix;
+    return prefix + ['', '', '二', '三', '四', '五'][index];
+  }
+
+  function buildChart(upperKey, lowerKey, moving, meta) {
+    const upper = D.TRIGRAMS[upperKey];
+    const lower = D.TRIGRAMS[lowerKey];
+    if (!upper || !lower) throw new Error('卦象参数有误');
+    if (!(moving >= 1 && moving <= 6)) throw new Error('动爻须在 1–6 之间');
+
+    const lines = lower.bits.concat(upper.bits);
+    const ben = D.getHex(upperKey, lowerKey);
+
+    const huLower = D.trigramByBits([lines[1], lines[2], lines[3]]);
+    const huUpper = D.trigramByBits([lines[2], lines[3], lines[4]]);
+    const hu = D.getHex(huUpper.key, huLower.key);
+
+    const bianLines = lines.slice();
+    bianLines[moving - 1] = bianLines[moving - 1] === 1 ? 0 : 1;
+    const bianLower = D.trigramByBits(bianLines.slice(0, 3));
+    const bianUpper = D.trigramByBits(bianLines.slice(3, 6));
+    const bian = D.getHex(bianUpper.key, bianLower.key);
+
+    const cuoLines = lines.map(function (v) { return v === 1 ? 0 : 1; });
+    const cuo = D.hexByLines(cuoLines);
+    const zongLines = lines.slice().reverse();
+    const zong = D.hexByLines(zongLines);
+
+    const tiSide = moving <= 3 ? 'upper' : 'lower';
+    const ti = tiSide === 'upper' ? upper : lower;
+    const yong = tiSide === 'upper' ? lower : upper;
+
+    const bianYong = D.trigramByBits(
+      tiSide === 'upper' ? bianLines.slice(0, 3) : bianLines.slice(3, 6)
+    );
+
+    const relTiYong = relationOf(ti.wuxing, yong.wuxing);
+    const relHuUpper = relationOf(ti.wuxing, huUpper.wuxing);
+    const relHuLower = relationOf(ti.wuxing, huLower.wuxing);
+    const relBian = relationOf(ti.wuxing, bianYong.wuxing);
+
+    return {
+      upper: upper,
+      lower: lower,
+      lines: lines,
+      moving: moving,
+      ben: ben,
+      hu: hu,
+      huUpper: huUpper,
+      huLower: huLower,
+      bian: bian,
+      bianUpper: bianUpper,
+      bianLower: bianLower,
+      bianYong: bianYong,
+      cuo: cuo,
+      zong: zong,
+      ti: ti,
+      yong: yong,
+      tiSide: tiSide,
+      relations: {
+        tiYong: relTiYong,
+        huUpper: relHuUpper,
+        huLower: relHuLower,
+        bian: relBian
+      },
+      meta: meta || {}
+    };
+  }
+
+  /* ---------------- 起卦 ---------------- */
+
+  function castTime(date, opts) {
+    opts = opts || {};
+    const hour = date.getHours();
+    const sc = L.shichenOf(hour);
+    let lunarDate = date;
+    if (opts.lateZi !== false && hour === 23) lunarDate = L.addDays(date, 1);
+    const lunar = L.toLunar(lunarDate);
+    if (!lunar) return { error: '当前环境不支持农历换算，请使用手动农历起卦。' };
+
+    const y = lunar.yearBranchNum;
+    const m = lunar.month;
+    const d = lunar.day;
+    const h = sc.index;
+    const s1 = y + m + d;
+    const s2 = s1 + h;
+    const upperNum = mod(s1, 8);
+    const lowerNum = mod(s2, 8);
+    const moving = mod(s2, 6);
+
+    const chart = buildChart(
+      D.trigramByNumber(upperNum).key,
+      D.trigramByNumber(lowerNum).key,
+      moving,
+      {
+        method: 'time',
+        methodName: '年月日时起卦',
+        solar: L.formatDate(date),
+        lunar: lunar,
+        shichen: sc,
+        shichenIndex: h,
+        numbers: { year: y, month: m, day: d, hour: h, sum1: s1, sum2: s2 },
+        timeNum: h,
+        timeUsed: true,
+        upperNum: upperNum,
+        lowerNum: lowerNum,
+        monthJian: L.monthJian(date),
+        note: opts.lateZi !== false && hour === 23 ? '晚子时作次日论' : ''
+      }
+    );
+    return chart;
+  }
+
+  function castLunar(opts) {
+    opts = opts || {};
+    const yearGZ = opts.yearGZ || '甲子';
+    const month = parseInt(opts.month, 10);
+    const day = parseInt(opts.day, 10);
+    const hourIndex = parseInt(opts.hourIndex, 10);
+    if (!(month >= 1 && month <= 12)) return { error: '请选择农历月份。' };
+    if (!(day >= 1 && day <= 30)) return { error: '请选择农历日期。' };
+    if (!(hourIndex >= 1 && hourIndex <= 12)) return { error: '请选择时辰。' };
+    const now = opts.date ? new Date(opts.date) : new Date();
+    const lunar = L.manualLunar(yearGZ, month, day, !!opts.isLeap);
+    const y = lunar.yearBranchNum;
+    const h = hourIndex;
+    const s1 = y + month + day;
+    const s2 = s1 + h;
+    const upperNum = mod(s1, 8);
+    const lowerNum = mod(s2, 8);
+    const moving = mod(s2, 6);
+    return buildChart(
+      D.trigramByNumber(upperNum).key,
+      D.trigramByNumber(lowerNum).key,
+      moving,
+      {
+        method: 'lunar',
+        methodName: '农历起卦',
+        solar: L.formatDate(now),
+        lunar: lunar,
+        shichen: L.shichenByIndex(h),
+        shichenIndex: h,
+        numbers: { year: y, month: month, day: day, hour: h, sum1: s1, sum2: s2 },
+        timeNum: h,
+        timeUsed: true,
+        upperNum: upperNum,
+        lowerNum: lowerNum,
+        monthJian: L.monthJian(now),
+        note: '手动填写农历' + (lunar.isLeap ? '（闰月作本月论）' : '') + '，月建仍按公历节气推算'
+      }
+    );
+  }
+
+  function castNumbers(a, b, c, opts) {
+    opts = opts || {};
+    a = Math.abs(parseInt(a, 10) || 0);
+    b = Math.abs(parseInt(b, 10) || 0);
+    c = Math.abs(parseInt(c, 10) || 0);
+    if (!a || !b) return { error: '请填写两个以上的数字（正整数）。' };
+    const sum = a + b + c;
+    const upperNum = mod(a, 8);
+    const lowerNum = mod(b, 8);
+    const moving = mod(sum, 6);
+    const now = opts.date ? new Date(opts.date) : new Date();
+    const chart = buildChart(
+      D.trigramByNumber(upperNum).key,
+      D.trigramByNumber(lowerNum).key,
+      moving,
+      {
+        method: 'number',
+        methodName: '数字起卦',
+        solar: L.formatDate(now),
+        lunar: L.toLunar(now),
+        shichen: L.shichenOf(now.getHours()),
+        numbers: { a: a, b: b, c: c, sum: sum },
+        timeNum: L.shichenOf(now.getHours()).index,
+        timeUsed: false,
+        upperNum: upperNum,
+        lowerNum: lowerNum,
+        monthJian: L.monthJian(now),
+        note: c ? '三数起卦：上卦取首数，下卦取次数，动爻取三数之和' : '两数起卦：上卦取首数，下卦取次数，动爻取两数之和'
+      }
+    );
+    return chart;
+  }
+
+  function castChars(text, opts) {
+    opts = opts || {};
+    const clean = (text || '').replace(/[\s，。、；：！？,.;:!?“”"'‘’（）()《》【】\-—…]/g, '');
+    const n = Array.from(clean).length;
+    if (n < 2) return { error: '请至少输入两个字。' };
+    const upperCount = Math.floor(n / 2);
+    const lowerCount = n - upperCount;
+    const upperNum = mod(opts.upperNum || upperCount, 8);
+    const lowerNum = mod(opts.lowerNum || lowerCount, 8);
+    const total = opts.total || (opts.upperNum && opts.lowerNum
+      ? Number(opts.upperNum) + Number(opts.lowerNum)
+      : n);
+    const moving = mod(total, 6);
+    const now = opts.date ? new Date(opts.date) : new Date();
+    const chart = buildChart(
+      D.trigramByNumber(upperNum).key,
+      D.trigramByNumber(lowerNum).key,
+      moving,
+      {
+        method: 'char',
+        methodName: '字占起卦',
+        solar: L.formatDate(now),
+        lunar: L.toLunar(now),
+        shichen: L.shichenOf(now.getHours()),
+        text: clean,
+        numbers: { total: total, chars: n, upper: upperCount, lower: lowerCount },
+        timeNum: L.shichenOf(now.getHours()).index,
+        timeUsed: false,
+        upperNum: upperNum,
+        lowerNum: lowerNum,
+        monthJian: L.monthJian(now),
+        note: '字占古法以笔画或平仄起卦；此处默认以字数起卦，可在「上卦数 / 下卦数」中手动修正'
+      }
+    );
+    return chart;
+  }
+
+  function castManual(upperKey, lowerKey, moving, opts) {
+    opts = opts || {};
+    const now = opts.date ? new Date(opts.date) : new Date();
+    const upper = D.TRIGRAMS[upperKey];
+    const lower = D.TRIGRAMS[lowerKey];
+    if (!upper || !lower) return { error: '请选择上下卦。' };
+    return buildChart(upperKey, lowerKey, parseInt(moving, 10) || 1, {
+      method: 'manual',
+      methodName: '手动排卦',
+      solar: L.formatDate(now),
+      lunar: L.toLunar(now),
+      shichen: L.shichenOf(now.getHours()),
+      numbers: {},
+      timeNum: L.shichenOf(now.getHours()).index,
+      timeUsed: false,
+      upperNum: upper.num,
+      lowerNum: lower.num,
+      monthJian: L.monthJian(now),
+      note: '手动指定上下卦与动爻，用于校验或按卦象起卦'
+    });
+  }
+
+  /* ---------------- 断卦 ---------------- */
+
+  function gradeOf(score) {
+    if (score >= 3.6) return { key: 'daji', name: '大吉', tone: '吉' };
+    if (score >= 2.2) return { key: 'ji', name: '吉', tone: '吉' };
+    if (score >= 0.8) return { key: 'xiaoji', name: '小吉', tone: '小吉' };
+    if (score > -0.8) return { key: 'ping', name: '平', tone: '平' };
+    if (score > -2.2) return { key: 'xiaoxiong', name: '小凶', tone: '小凶' };
+    if (score > -3.6) return { key: 'xiong', name: '凶', tone: '凶' };
+    return { key: 'daxiong', name: '大凶', tone: '凶' };
+  }
+
+  const YAO_POS = {
+    1: '初爻为事之始，位卑而力弱，宜潜藏待时，不可轻动。',
+    2: '二爻居内卦之中，臣位而得中，多主稳当，宜守正待应。',
+    3: '三爻处内卦之极，过刚则凶，行止之间最须谨慎。',
+    4: '四爻入外卦之初，近君多惧，事将及身，宜审时而动。',
+    5: '五爻为尊位，得中而多吉，主事有主宰，可望成就。',
+    6: '上爻处一卦之终，亢极则悔，宜知止、宜退守。'
+  };
+
+  function tgDesc(t) {
+    return t.name + '（' + t.nature + (t.nature === t.wuxing ? '' : '，' + t.wuxing) + '）';
+  }
+
+  function analyze(chart, options) {
+    options = options || {};
+    const topicKey = options.topic || 'zonghe';
+    const motion = options.motion || 'zuo'; // xing 行 / li 立 / zuo 坐
+    const monthJian = (options.monthJian && options.monthJian.wuxing) ? options.monthJian : chart.meta.monthJian;
+    const monthEl = monthJian ? monthJian.wuxing : '土';
+
+    const ti = chart.ti;
+    const yong = chart.yong;
+    const rel = REL[chart.relations.tiYong];
+    const wsTi = wangShuai(ti.wuxing, monthEl);
+    const wsYong = wangShuai(yong.wuxing, monthEl);
+    const wsHuU = wangShuai(chart.huUpper.wuxing, monthEl);
+    const wsHuL = wangShuai(chart.huLower.wuxing, monthEl);
+    const wsBian = wangShuai(chart.bianYong.wuxing, monthEl);
+
+    const huRelU = REL[chart.relations.huUpper];
+    const huRelL = REL[chart.relations.huLower];
+    const bianRel = REL[chart.relations.bian];
+
+    let score = rel.score + wsTi.score;
+    score += (huRelU.score + huRelL.score) * 0.18;
+    score += bianRel.score * 0.55;
+    score += (wsYong.score * -0.15);
+    score = Math.max(-6, Math.min(6, Math.round(score * 10) / 10));
+    // 用克体者，纵有变卦生扶，亦只减其凶，不作吉断
+    if (rel.key === 'yongKe' && score > -0.9) score = -0.9;
+
+    const grade = gradeOf(score);
+    const yao = yaoName(chart.lines, chart.moving);
+    const yang = chart.lines[chart.moving - 1] === 1;
+    const properPos = (yang && chart.moving % 2 === 1) || (!yang && chart.moving % 2 === 0);
+    const sum = chart.upper.num + chart.lower.num + (chart.meta.timeUsed ? (chart.meta.timeNum || 0) : 0);
+
+    const sections = [];
+
+    sections.push({
+      key: 'zong',
+      title: '总断',
+      text: '体卦为' + tgDesc(ti) + '，用卦为' + tgDesc(yong) + '。' + rel.text +
+        '本卦「' + chart.ben.name + '」，' + chart.ben.meaning + '，事之本体也。'
+    });
+
+    sections.push({
+      key: 'wang',
+      title: '旺衰',
+      text: '起卦值' + (monthJian ? monthJian.text : '') + '，月建' + (monthJian ? monthJian.branch : '') +
+        '属' + monthEl + '。体卦' + ti.wuxing + '在' + monthEl + '月为「' + wsTi.state + '」，' + wsTi.desc + '；' +
+        '用卦' + yong.wuxing + '为「' + wsYong.state + '」。' +
+        (wsTi.score >= 0.6
+          ? '体气有余，吉者可成，凶者亦能支撑。'
+          : wsTi.score <= -0.4
+            ? '体气不足，纵有吉象亦难全功，须待时令扶助。'
+            : '体气中和，吉凶皆在人为。')
+    });
+
+    const huSame = chart.huUpper.key === chart.huLower.key;
+    sections.push({
+      key: 'hu',
+      title: '互卦·过程',
+      text: (huSame
+        ? '互卦重' + chart.huUpper.name + '（' + chart.huUpper.wuxing + '），为一事之中间、过程中的曲折。' +
+          huText(chart.huUpper, huRelU)
+        : '互卦上' + chart.huUpper.name + '（' + chart.huUpper.wuxing + '）下' + chart.huLower.name +
+          '（' + chart.huLower.wuxing + '），为一事之中间、过程中的曲折。' +
+          huText(chart.huUpper, huRelU) + huText(chart.huLower, huRelL)) +
+        '合而观之，' + (huRelU.score + huRelL.score >= 0 ? '中途尚有助力，事可循序而进。' : '中途多有阻滞，须防节外生枝。')
+    });
+
+    sections.push({
+      key: 'bian',
+      title: '变卦·终局',
+      text: '动爻在' + yao + '，' + (properPos ? '当位' : '不当位') + '。' +
+        YAO_POS[chart.moving] +
+        '用卦' + yong.name + '变出' + chart.bianYong.name + '（' + chart.bianYong.wuxing + '），得变卦「' +
+        chart.bian.name + '」，为事之终。' + BIAN_TEXT[chart.relations.bian]
+    });
+
+    const ying = buildYingqi(chart, motion, sum, wsTi, wsYong);
+    sections.push({ key: 'ying', title: '应期', text: ying.text });
+
+    const topicText = buildTopicText(chart, topicKey);
+    if (topicText) sections.push({ key: 'topic', title: '类象·所占之事', text: topicText });
+
+    const advice = buildAdvice(chart, grade, rel, wsTi, topicKey, motion);
+
+    return {
+      score: score,
+      grade: grade,
+      sections: sections,
+      advice: advice,
+      yingqi: ying,
+      wangshuai: {
+        month: monthJian,
+        ti: wsTi,
+        yong: wsYong,
+        huUpper: wsHuU,
+        huLower: wsHuL,
+        bian: wsBian
+      },
+      yao: { name: yao, yang: yang, proper: properPos, index: chart.moving },
+      topic: topicKey,
+      motion: motion
+    };
+  }
+
+  function huText(trigram, rel) {
+    if (rel.key === 'shengTi') return '互' + trigram.name + '生体，中途得人以助；';
+    if (rel.key === 'yongKe') return '互' + trigram.name + '克体，中途有阻有耗；';
+    if (rel.key === 'tiKe') return '体克互' + trigram.name + '，中途尚能控局；';
+    if (rel.key === 'tiSheng') return '体生互' + trigram.name + '，中途不免耗力；';
+    return '互' + trigram.name + '与体比和，中途平顺；';
+  }
+
+  function buildYingqi(chart, motion, sum, wsTi, wsYong) {
+    const factor = motion === 'xing' ? 0.5 : motion === 'zuo' ? 2 : 1;
+    const days = Math.max(1, Math.round(sum * factor));
+    const yongEl = chart.yong.wuxing;
+    const branches = YING_BRANCH[yongEl].join('、');
+    const season = YING_SEASON[yongEl];
+    const yaoNum = chart.moving;
+
+    let text2 = '';
+    if (wsTi.state === '旺') text2 = '体旺则应速。';
+    else if (wsTi.state === '囚' || wsTi.state === '死') text2 = '体衰则应迟，须待生扶之期。';
+
+    const text =
+      '成卦之数' + sum + '（' + chart.upper.name + chart.upper.num + ' + ' + chart.lower.name + chart.lower.num +
+      (chart.meta.timeUsed ? ' + 时' + (chart.meta.timeNum || 0) : '') + '）。' +
+      (motion === 'xing'
+        ? '行占则应速，取成卦之数之半，约' + days + '日。'
+        : motion === 'zuo'
+          ? '坐占则应迟，倍成卦之数，约' + days + '日。'
+          : '立占则半迟半速，以成卦之数定之，约' + days + '日。') +
+      '又以用卦' + chart.yong.name + '属' + yongEl + '，应' + branches + '月日，' + season + '为其旺时；' +
+      '动爻在第' + yaoNum + '爻，亦可应' + yaoNum + '日或' + yaoNum + '月。' +
+      text2 +
+      '数与时令须参看外应，不可执一。';
+
+    return {
+      text: text,
+      days: days,
+      branches: branches,
+      season: season,
+      factor: factor
+    };
+  }
+
+  function buildTopicText(chart, topicKey) {
+    const X = global.MHXiang;
+    const Learn = global.MHLearn;
+    if (!X) return '';
+    const topic = X.TOPICS.filter(function (t) { return t.key === topicKey; })[0] || X.TOPICS[0];
+    const fields = topic.xiang || [];
+    const yongX = X.XIANG[chart.yong.key];
+    const tiX = X.XIANG[chart.ti.key];
+    if (!yongX || !tiX) return '';
+    const parts = [];
+    const rule = Learn && Learn.TOPIC_RULES[topicKey];
+    if (rule) {
+      parts.push('《梅花易数》' + rule.name + '占：' + rule.basis + '今体用之间，' + (rule.byRel[chart.relations.tiYong] || '') + '。');
+    }
+    parts.push('以用卦' + chart.yong.name + '（' + chart.yong.nature + '）为事：');
+    const labels = {};
+    X.CATEGORIES.forEach(function (c) { labels[c[0]] = c[1]; });
+    fields.forEach(function (f) {
+      if (yongX[f]) parts.push(labels[f] + '——' + yongX[f]);
+    });
+    parts.push('以体卦' + chart.ti.name + '（' + chart.ti.nature + '）为我：' + tiX.renwu + '。');
+    if (Learn) {
+      if (chart.relations.tiYong === 'shengTi' && Learn.SHENG_TI[chart.yong.key]) {
+        parts.push('用卦生体，' + Learn.SHENG_TI[chart.yong.key]);
+      } else if (chart.relations.tiYong === 'yongKe' && Learn.KE_TI[chart.yong.key]) {
+        parts.push('用卦克体，' + Learn.KE_TI[chart.yong.key]);
+      }
+    }
+    if (topicKey === 'shiwu' && yongX && X.XIANG[chart.bianYong.key]) {
+      parts.push('变卦' + chart.bianYong.name + '，失物可于' + X.XIANG[chart.bianYong.key].dili.replace(/。$/, '') + '寻之。');
+    }
+    parts.push('体用相参，' + (chart.ti.wuxing === chart.yong.wuxing
+      ? '同气相求，事多从本分而来。'
+      : '以' + chart.ti.wuxing + '观' + chart.yong.wuxing + '，' + REL[chart.relations.tiYong].short + '，吉凶已见总断。'));
+    return parts.join('');
+  }
+
+  function buildAdvice(chart, grade, rel, wsTi, topicKey, motion) {
+    const out = [];
+    if (grade.key === 'daji' || grade.key === 'ji') {
+      out.push('卦象向吉，时机可乘，宜果断行事，不必过疑。');
+    } else if (grade.key === 'xiaoji') {
+      out.push('事可为，然须循序渐进，不可求快。');
+    } else if (grade.key === 'ping') {
+      out.push('吉凶相参，谋事在人；宜守正待时，勿躁进。');
+    } else if (grade.key === 'xiaoxiong') {
+      out.push('卦气不利，宜缓不宜急，先固根本，再图进取。');
+    } else {
+      out.push('卦象示阻，宜止宜避；强行则损耗随之，静守反得平安。');
+    }
+
+    if (rel.key === 'yongKe') out.push('用克体，凡事先防外来的压力与损耗，签约、借贷、争执尤须谨慎。');
+    if (rel.key === 'tiSheng') out.push('体生用，主付出多而回报少，量力而行，留有余地。');
+    if (rel.key === 'tiKe') out.push('体克用，事虽可成，却须亲力亲为，迟中得之。');
+    if (rel.key === 'shengTi') out.push('用生体，可得贵人或外力之助，宜主动求援、借势而行。');
+    if (wsTi.score <= -0.4) out.push('体卦失令，宜借时令、方位、人事以补气：待旺月旺日，或向日辰生扶之方。');
+    if (motion === 'zuo') out.push('坐占应迟，事非旦夕可决，宜耐心候之。');
+    if (motion === 'xing') out.push('行占应速，近日即见分晓，宜早作准备。');
+
+    const topicTips = {
+      shiye: '谋事以体卦为自身、用卦为所谋之事：体旺用衰则事在我，用旺体衰则事强我弱。',
+      caifu: '求财以体克用、用生体为得财之象；体生用为耗财，用克体防破财。',
+      ganqing: '婚姻以体用比和、用生体为吉；用克体多阻，体克用可成而费力。',
+      jiankang: '疾病以体卦为病人：体旺易愈，体衰缠绵；用克体者症重，宜早治。',
+      chuxing: '出行以体卦为主人、用卦为路途：用生体吉，用克体防阻，体克用可行。',
+      shiwu: '失物以用卦为失物：用生体、比和可寻；用克体难觅，体克用可追。',
+      guansong: '官讼以体为主、用为对方：体克用我胜，用克体彼强，比和可和解。',
+      xueye: '功名以体卦为才学、用卦为名场：体旺用生，名可成。',
+      jiating: '家宅以体卦为宅、用卦为人口：体旺宅安，用克体防口舌灾病。'
+    };
+    if (topicTips[topicKey]) out.push(topicTips[topicKey]);
+    return out;
+  }
+
+  const MOTIONS = [
+    { key: 'xing', name: '行（走动、外出）', factor: '半' },
+    { key: 'li', name: '立（站立、暂留）', factor: '常数' },
+    { key: 'zuo', name: '坐（安坐、静候）', factor: '倍' }
+  ];
+
+  global.MHEngine = {
+    SHENG: SHENG,
+    KE: KE,
+    REL: REL,
+    WANG: WANG,
+    MOTIONS: MOTIONS,
+    mod: mod,
+    relationOf: relationOf,
+    wangShuai: wangShuai,
+    buildChart: buildChart,
+    castTime: castTime,
+    castLunar: castLunar,
+    castNumbers: castNumbers,
+    castChars: castChars,
+    castManual: castManual,
+    analyze: analyze,
+    gradeOf: gradeOf,
+    yaoName: yaoName
+  };
+})(typeof window !== 'undefined' ? window : globalThis);
+</script>
+<script>
+/*!
+ * 梅花易数 · 界面
+ */
+(function () {
+  'use strict';
+
+  const D = window.MHData;
+  const E = window.MHEngine;
+  const L = window.MHLunar;
+  const X = window.MHXiang;
+  const Learn = window.MHLearn;
+
+  const $ = (sel, root) => (root || document).querySelector(sel);
+  const $$ = (sel, root) => Array.from((root || document).querySelectorAll(sel));
+
+  const STORE_KEY = 'meihua.history.v1';
+
+  const state = {
+    method: 'time',
+    chart: null,
+    analysis: null,
+    topic: 'zonghe',
+    motion: 'zuo',
+    detailTab: 'gua',
+    xiangKey: null,
+    view: 'cast',
+    fromCase: null
+  };
+
+  /* ---------------- 工具 ---------------- */
+
+  function esc(s) {
+    return String(s == null ? '' : s)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+  }
+
+  function pad(n) { return n < 10 ? '0' + n : '' + n; }
+
+  function nowLocalValue(d) {
+    const dt = d || new Date();
+    return dt.getFullYear() + '-' + pad(dt.getMonth() + 1) + '-' + pad(dt.getDate()) +
+      'T' + pad(dt.getHours()) + ':' + pad(dt.getMinutes());
+  }
+
+  function branchMonth(branch) {
+    if (!branch) return null;
+    const names = { 子: '大雪后', 丑: '小寒后', 寅: '立春后', 卯: '惊蛰后', 辰: '清明后', 巳: '立夏后', 午: '芒种后', 未: '小暑后', 申: '立秋后', 酉: '白露后', 戌: '寒露后', 亥: '立冬后' };
+    const wx = { 子: '水', 丑: '土', 寅: '木', 卯: '木', 辰: '土', 巳: '火', 午: '火', 未: '土', 申: '金', 酉: '金', 戌: '土', 亥: '水' };
+    return { branch: branch, wuxing: wx[branch], name: branch + '月', term: names[branch], text: names[branch] + '（' + branch + '月）' };
+  }
+
+  let toastTimer = null;
+  function toast(msg) {
+    let el = $('#toast');
+    if (!el) {
+      el = document.createElement('div');
+      el.id = 'toast';
+      el.className = 'toast';
+      document.body.appendChild(el);
+    }
+    el.textContent = msg;
+    el.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => el.classList.remove('show'), 2200);
+  }
+
+  /* ---------------- 视图切换 ---------------- */
+
+  function switchView(view) {
+    state.view = view;
+    $$('.main-nav button').forEach(b => b.classList.toggle('active', b.dataset.view === view));
+    $$('.view').forEach(v => v.classList.toggle('active', v.id === 'view-' + view));
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  /* ---------------- 初始化表单 ---------------- */
+
+  function initForm() {
+    $$('#methodTabs button').forEach(btn => {
+      btn.addEventListener('click', () => {
+        state.method = btn.dataset.method;
+        $$('#methodTabs button').forEach(b => b.classList.toggle('active', b === btn));
+        $$('.pane').forEach(p => p.classList.toggle('active', p.dataset.pane === state.method));
+        updateTimeHint();
+      });
+    });
+
+    const topicSelect = $('#topicSelect');
+    X.TOPICS.forEach(t => {
+      const o = document.createElement('option');
+      o.value = t.key;
+      o.textContent = t.name;
+      topicSelect.appendChild(o);
+    });
+    topicSelect.value = 'zonghe';
+    topicSelect.addEventListener('change', () => {
+      state.topic = topicSelect.value;
+      if (state.chart) reanalyze();
+    });
+
+    $('#motionSelect').addEventListener('change', e => {
+      state.motion = e.target.value;
+      if (state.chart) reanalyze();
+    });
+
+    const manUpper = $('#manUpper');
+    const manLower = $('#manLower');
+    D.TRIGRAM_ORDER.forEach(k => {
+      const t = D.TRIGRAMS[k];
+      [manUpper, manLower].forEach(sel => {
+        const o = document.createElement('option');
+        o.value = k;
+        o.textContent = t.name + ' · ' + t.nature;
+        sel.appendChild(o);
+      });
+    });
+    manUpper.value = 'dui';
+    manLower.value = 'li';
+
+    $('#timeInput').value = nowLocalValue();
+    $('#timeInput').addEventListener('change', updateTimeHint);
+
+    initLunarFallback();
+    $('#lunarFallback').addEventListener('toggle', updateTimeHint);
+    ['lunYear', 'lunMonth', 'lunDay', 'lunHour', 'lunLeap'].forEach(function (id) {
+      $('#' + id).addEventListener('change', updateTimeHint);
+    });
+
+    $('#castBtn').addEventListener('click', () => cast());
+    $('#randomBtn').addEventListener('click', randomCast);
+
+    ['num1', 'num2', 'num3', 'charInput', 'charUpper', 'charLower'].forEach(id => {
+      const el = $('#' + id);
+      if (el) el.addEventListener('keydown', e => { if (e.key === 'Enter') cast(); });
+    });
+
+    document.addEventListener('keydown', e => {
+      const tag = (e.target.tagName || '').toLowerCase();
+      if (tag === 'input' || tag === 'select' || tag === 'textarea') return;
+      if (e.key === 'r' || e.key === 'R') randomCast();
+      if (e.key === 'p' || e.key === 'P') { if (state.chart) window.print(); }
+    });
+  }
+
+  function initLunarFallback() {
+    const yearSel = $('#lunYear');
+    const monthSel = $('#lunMonth');
+    const daySel = $('#lunDay');
+    const hourSel = $('#lunHour');
+
+    for (let i = 0; i < 60; i += 1) {
+      const gz = L.STEMS[i % 10] + L.BRANCHES[i % 12];
+      const o = document.createElement('option');
+      o.value = gz;
+      o.textContent = gz + '年';
+      yearSel.appendChild(o);
+    }
+    const MONTH_NAMES = ['正', '二', '三', '四', '五', '六', '七', '八', '九', '十', '冬', '腊'];
+    for (let m = 1; m <= 12; m += 1) {
+      const o = document.createElement('option');
+      o.value = String(m);
+      o.textContent = MONTH_NAMES[m - 1] + '月';
+      monthSel.appendChild(o);
+    }
+    for (let d = 1; d <= 30; d += 1) {
+      const o = document.createElement('option');
+      o.value = String(d);
+      o.textContent = L.dayName(d);
+      daySel.appendChild(o);
+    }
+    L.SHICHEN.forEach(function (s) {
+      const o = document.createElement('option');
+      o.value = String(s.index);
+      o.textContent = s.name + ' ' + s.range;
+      hourSel.appendChild(o);
+    });
+
+    const now = new Date();
+    const lunar = L.toLunar(now);
+    if (lunar) {
+      yearSel.value = lunar.yearGanZhi;
+      monthSel.value = String(lunar.month);
+      daySel.value = String(lunar.day);
+      $('#lunLeap').checked = !!lunar.isLeap;
+    } else {
+      yearSel.value = L.STEMS[(((now.getFullYear() - 4) % 10) + 10) % 10] + L.BRANCHES[(((now.getFullYear() - 4) % 12) + 12) % 12];
+      monthSel.value = '1';
+      daySel.value = '1';
+      $('#lunarFallback').open = true;
+      $('#lunarFallbackHint').textContent = '当前浏览器不支持农历自动换算，请手动填写农历年月日时；月建仍按公历节气推算。';
+    }
+    hourSel.value = String(L.shichenOf(now.getHours()).index);
+  }
+
+  function updateTimeHint() {
+    const hint = $('#timeHint');
+    const fb = $('#lunarFallback');
+    if (fb && fb.open) {
+      const monthNames = ['正', '二', '三', '四', '五', '六', '七', '八', '九', '十', '冬', '腊'];
+      const m = parseInt($('#lunMonth').value, 10) || 1;
+      const d = parseInt($('#lunDay').value, 10) || 1;
+      const sc = L.shichenByIndex(parseInt($('#lunHour').value, 10) || 1);
+      hint.innerHTML = '手动农历：<b>' + esc($('#lunYear').value) + '年' +
+        ($('#lunLeap').checked ? '闰' : '') + monthNames[m - 1] + '月' + L.dayName(d) +
+        '</b> · ' + esc(sc.name + '（' + sc.range + '）');
+      return;
+    }
+    const input = $('#timeInput');
+    if (!input.value) { hint.textContent = ''; return; }
+    const d = new Date(input.value);
+    if (isNaN(d.getTime())) { hint.textContent = ''; return; }
+    let lunarDate = d;
+    if ($('#lateZi').checked && d.getHours() === 23) lunarDate = L.addDays(d, 1);
+    const lunar = L.toLunar(lunarDate);
+    const sc = L.shichenOf(d.getHours());
+    const mj = L.monthJian(d);
+    if (lunar) {
+      hint.innerHTML = '农历 <b>' + esc(lunar.yearGanZhi + '年' + lunar.monthName + lunar.dayName) + '</b> · ' +
+        esc(sc.name + '（' + sc.range + '）') + ' · 月建' + esc(mj.name) +
+        (lunar.isLeap ? ' · 闰月作本月论' : '');
+    } else {
+      fb.open = true;
+      updateTimeHint();
+    }
+  }
+
+  /* ---------------- 起卦 ---------------- */
+
+  function cast(silent) {
+    const err = $('#castError');
+    err.hidden = true;
+
+    let chart = null;
+    if (state.method === 'time') {
+      const fb = $('#lunarFallback');
+      if (fb && fb.open) {
+        chart = E.castLunar({
+          yearGZ: $('#lunYear').value,
+          month: $('#lunMonth').value,
+          day: $('#lunDay').value,
+          hourIndex: $('#lunHour').value,
+          isLeap: $('#lunLeap').checked
+        });
+      } else {
+        const v = $('#timeInput').value;
+        const d = v ? new Date(v) : new Date();
+        if (isNaN(d.getTime())) { showError('请填写有效的起卦时刻。'); return; }
+        chart = E.castTime(d, { lateZi: $('#lateZi').checked });
+      }
+    } else if (state.method === 'number') {
+      const a = $('#num1').value;
+      const b = $('#num2').value;
+      const c = $('#num3').value;
+      chart = E.castNumbers(a, b, c);
+    } else if (state.method === 'char') {
+      const text = $('#charInput').value;
+      const up = $('#charUpper').value;
+      const low = $('#charLower').value;
+      chart = E.castChars(text, {
+        upperNum: up ? Number(up) : undefined,
+        lowerNum: low ? Number(low) : undefined,
+        total: (up && low) ? Number(up) + Number(low) : undefined
+      });
+    } else {
+      chart = E.castManual($('#manUpper').value, $('#manLower').value, $('#manMoving').value);
+    }
+
+    if (!chart || chart.error) {
+      if (chart && chart.error.indexOf('农历') >= 0 && !$('#lunarFallback').open) {
+        $('#lunarFallback').open = true;
+        updateTimeHint();
+      }
+      showError((chart && chart.error) || '起卦失败，请检查参数。');
+      return;
+    }
+
+    state.fromCase = null;
+    state.chart = chart;
+    state.xiangKey = null;
+    reanalyze();
+    renderChart();
+    $('#emptyState').hidden = true;
+    $('#result').hidden = false;
+    if (!silent) {
+      toast('已起卦：' + chart.ben.name + '　' + E.yaoName(chart.lines, chart.moving) + '动');
+      $('#chartCard').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+  }
+
+  function showError(msg) {
+    const err = $('#castError');
+    err.textContent = msg;
+    err.hidden = false;
+  }
+
+  function randomCast() {
+    const a = Math.floor(Math.random() * 99) + 1;
+    const b = Math.floor(Math.random() * 99) + 1;
+    const c = Math.random() < 0.5 ? 0 : Math.floor(Math.random() * 9) + 1;
+    state.method = 'number';
+    $$('#methodTabs button').forEach(x => x.classList.toggle('active', x.dataset.method === 'number'));
+    $$('.pane').forEach(p => p.classList.toggle('active', p.dataset.pane === 'number'));
+    $('#num1').value = a;
+    $('#num2').value = b;
+    $('#num3').value = c || '';
+    cast(true);
+    toast('心易一卦：' + a + ' · ' + b + (c ? ' · ' + c : ''));
+  }
+
+  function reanalyze() {
+    const chart = state.chart;
+    if (!chart) return;
+    state.analysis = E.analyze(chart, {
+      topic: state.topic,
+      motion: state.motion,
+      monthJian: chart.meta.monthJian
+    });
+    renderVerdict();
+    renderDetail();
+  }
+
+  /* ---------------- 渲染卦盘 ---------------- */
+
+  function lineRow(yang, moving, mark) {
+    const inner = yang ? '<i></i>' : '<i></i><i></i>';
+    return '<div class="line-row' + (moving ? ' moving' : '') + '">' +
+      '<div class="line ' + (yang ? 'yang' : 'yin') + '">' + inner + '</div>' +
+      '<span class="moving-mark">' + (moving ? mark : '') + '</span>' +
+      '</div>';
+  }
+
+  function triLines() { return ''; }
+
+  function hexBlock(opts) {
+    const hex = opts.hex;
+    const lines = opts.lines;
+    const moving = opts.moving;
+    const tags = opts.tags || ['', ''];
+    const upperBits = lines.slice(3, 6);
+    const lowerBits = lines.slice(0, 3);
+
+    function group(bits, offset, tag) {
+      let rows = '';
+      for (let i = 2; i >= 0; i -= 1) {
+        const idx = offset + i;
+        const isMoving = moving && (idx + 1) === moving;
+        const mark = isMoving ? (bits[i] === 1 ? '○' : '×') : '';
+        rows += lineRow(bits[i] === 1, !!isMoving, mark);
+      }
+      const tagCls = tag === '体' ? 'ti' : tag === '用' ? 'yong' : tag === '变' ? 'bian' : tag === '上互' || tag === '下互' ? 'hu' : 'plain';
+      return '<div class="tri-group"><span class="tri-tag ' + tagCls + '">' + (tag || '　') + '</span>' +
+        '<div class="tri-lines">' + rows + '</div></div>';
+    }
+
+    const upperTag = tags[0];
+    const lowerTag = tags[1];
+    const foot = '上' + hex.upper.name + hex.upper.wuxing + ' · 下' + hex.lower.name + hex.lower.wuxing;
+
+    return '<div class="hex-block">' +
+      '<div class="hex-head"><span class="hex-kind">' + esc(opts.kind) + '</span>' +
+      '<span class="hex-name">' + esc(hex.name) + '</span></div>' +
+      '<div class="hex-body">' +
+      group(upperBits, 3, upperTag) +
+      group(lowerBits, 0, lowerTag) +
+      '</div>' +
+      '<div class="hex-foot">' + foot + '</div>' +
+      '</div>';
+  }
+
+  function numbersText(chart) {
+    const m = chart.meta;
+    const n = m.numbers || {};
+    if (m.method === 'time' || m.method === 'lunar') {
+      return '年' + n.year + '+月' + n.month + '+日' + n.day + '=' + n.sum1 + '，÷8余' + m.upperNum +
+        '；再加时' + n.hour + '=' + n.sum2 + '，÷8余' + m.lowerNum + '；' + n.sum2 + '÷6余' + chart.moving + '。';
+    }
+    if (m.method === 'number') {
+      return n.a + '÷8余' + m.upperNum + '，' + n.b + '÷8余' + m.lowerNum +
+        '，(' + n.a + '+' + n.b + (n.c ? '+' + n.c : '') + ')÷6余' + chart.moving + '。';
+    }
+    if (m.method === 'char') {
+      return '共' + n.chars + '字，上取' + n.upper + '、下取' + n.lower + '，总数' + n.total + '÷6余' + chart.moving + '。';
+    }
+    return '上' + chart.upper.name + chart.upper.num + '、下' + chart.lower.name + chart.lower.num + '，动爻第' + chart.moving + '。';
+  }
+
+  function renderChart() {
+    const chart = state.chart;
+    const ben = chart.ben;
+    const hu = chart.hu;
+    const bian = chart.bian;
+
+    $('#chartEyebrow').textContent = chart.meta.methodName + ' · ' + (X.TOPICS.filter(t => t.key === state.topic)[0] || {}).name;
+    $('#chartTitle').textContent = ben.name;
+    const yao = E.yaoName(chart.lines, chart.moving);
+    $('#chartSub').textContent = chart.upper.name + '上' + chart.lower.name + '下 · ' + yao + '动 · 变' + bian.name;
+    if (state.fromCase) $('#chartEyebrow').textContent = '卦例复原 · ' + state.fromCase + ' · ' + (X.TOPICS.filter(t => t.key === state.topic)[0] || {}).name;
+
+    const meta = [];
+    meta.push(['起卦', chart.meta.methodName]);
+    meta.push(['公历', chart.meta.solar]);
+    if (chart.meta.lunar) meta.push(['农历', chart.meta.lunar.text + (chart.meta.lunar.isLeap ? '（闰）' : '')]);
+    if (chart.meta.shichen) meta.push(['时辰', chart.meta.shichen.name + ' ' + chart.meta.shichen.range]);
+    if (chart.meta.monthJian) meta.push(['月建', chart.meta.monthJian.name + '（' + chart.meta.monthJian.wuxing + '）']);
+
+    $('#metaGrid').innerHTML = meta.map(function (row) {
+      return '<div class="meta-item"><dt>' + esc(row[0]) + '</dt><dd>' + esc(row[1]) + '</dd></div>';
+    }).join('');
+    $('#metaNote').innerHTML = '<b>起卦数</b>' + esc(numbersText(chart)) +
+      (chart.meta.note ? '<span style="margin-left:10px;color:var(--ink-4)">' + esc(chart.meta.note) + '</span>' : '');
+
+    const tiTag = chart.tiSide === 'upper' ? ['体', '用'] : ['用', '体'];
+    let html = hexBlock({ kind: '本卦', hex: ben, lines: chart.lines, moving: chart.moving, tags: tiTag });
+    html += '<div class="hex-arrow">→</div>';
+    html += hexBlock({ kind: '互卦', hex: hu, lines: hu.lower.bits.concat(hu.upper.bits), moving: 0, tags: ['上互', '下互'] });
+    html += '<div class="hex-arrow">→</div>';
+    html += hexBlock({ kind: '变卦', hex: bian, lines: bianLines(chart), moving: chart.moving, tags: [chart.tiSide === 'upper' ? '体' : '变', chart.tiSide === 'upper' ? '变' : '体'] });
+    $('#hexRow').innerHTML = html;
+
+    const rel = E.REL[chart.relations.tiYong];
+    const chips = [];
+    chips.push('<span class="chip ti"><em>体</em><b>' + chart.ti.name + '</b><i>' + chart.ti.wuxing + '</i></span>');
+    chips.push('<span class="chip yong"><em>用</em><b>' + chart.yong.name + '</b><i>' + chart.yong.wuxing + '</i></span>');
+    chips.push('<span class="chip ' + (rel.score > 0 ? 'good' : rel.score < 0 ? 'bad' : '') + '"><b>' + rel.short + '</b></span>');
+    chips.push('<span class="chip"><em>互</em><b>' + chart.huUpper.name + '</b><i>' + chart.huUpper.wuxing +
+      '</i><span class="dot">·</span><b>' + chart.huLower.name + '</b><i>' + chart.huLower.wuxing + '</i></span>');
+    chips.push('<span class="chip"><em>变</em><b>' + chart.bianYong.name + '</b><i>' + chart.bianYong.wuxing +
+      '</i><span class="dot">·</span><span class="rel">' + E.REL[chart.relations.bian].short + '</span></span>');
+    chips.push('<span class="chip"><em>卦义</em><b class="meaning">' + ben.meaning + '</b></span>');
+    $('#tiyongStrip').innerHTML = chips.join('');
+  }
+
+  function bianLines(chart) {
+    const arr = chart.lines.slice();
+    arr[chart.moving - 1] = arr[chart.moving - 1] === 1 ? 0 : 1;
+    return arr;
+  }
+
+  /* ---------------- 断语 ---------------- */
+
+  function renderVerdict() {
+    const a = state.analysis;
+    const chart = state.chart;
+    if (!a) return;
+
+    $('#gradeBadge').dataset.grade = a.grade.key;
+    $('#gradeBadge').innerHTML = '<strong>' + a.grade.name + '</strong><span>卦势</span>';
+
+    const rel = E.REL[chart.relations.tiYong];
+    $('#verdictLine').innerHTML = '体<b>' + esc(chart.ti.name) + esc(chart.ti.wuxing) + '</b>，用<b>' +
+      esc(chart.yong.name) + esc(chart.yong.wuxing) + '</b>，<b>' + esc(rel.short) + '</b>；卦势' +
+      esc(a.grade.name) + '。' + esc(briefOf(a.grade.key));
+
+    const pct = Math.round(((a.score + 6) / 12) * 100);
+    $('#meterFill').style.width = Math.max(4, Math.min(100, pct)) + '%';
+
+    $('#sections').innerHTML = a.sections.map(function (s) {
+      return '<div class="sec ' + esc(s.key) + '"><h3>' + esc(s.title) + '</h3><p>' + esc(s.text) + '</p></div>';
+    }).join('');
+
+    $('#adviceBlock').innerHTML = '<h3>行止之建议</h3><ul>' +
+      a.advice.map(t => '<li>' + esc(t) + '</li>').join('') + '</ul>';
+  }
+
+  function briefOf(key) {
+    return {
+      daji: '事可大成，宜乘时而进。',
+      ji: '谋为顺遂，宜果断而行。',
+      xiaoji: '小有所得，宜循序而进。',
+      ping: '吉凶相参，谋事在人。',
+      xiaoxiong: '略有阻滞，宜缓不宜急。',
+      xiong: '事多阻碍，宜守不宜攻。',
+      daxiong: '卦象示危，宜止宜避。'
+    }[key] || '';
+  }
+
+  /* ---------------- 详情 ---------------- */
+
+  function renderDetail() {
+    const chart = state.chart;
+    if (!chart) return;
+    $$('#detailTabs button').forEach(b => b.classList.toggle('active', b.dataset.tab === state.detailTab));
+    const body = $('#detailBody');
+
+    if (state.detailTab === 'gua') {
+      body.innerHTML = renderGuaCi(chart);
+    } else if (state.detailTab === 'xiang') {
+      body.innerHTML = renderXiang(chart);
+    } else if (state.detailTab === 'cuo') {
+      body.innerHTML = renderCuo(chart);
+    } else {
+      body.innerHTML = renderRules(chart);
+    }
+  }
+
+  function renderGuaCi(chart) {
+    function block(label, hex) {
+      return '<div class="ci-row"><dt>' + label + '</dt><dd>' +
+        '<div class="quote">' + esc(hex.name) + '：' + esc(hex.guaci) + '</div>' +
+        '<div style="color:var(--ink-3);font-size:13px;margin-top:4px">象曰：' + esc(hex.xiang) + '</div>' +
+        '<div style="color:var(--ink-4);font-size:12px;margin-top:2px">卦义：' + esc(hex.meaning) + '</div>' +
+        '</dd></div>';
+    }
+    return '<div class="gua-ci">' +
+      block('本卦', chart.ben) +
+      block('互卦', chart.hu) +
+      block('变卦', chart.bian) +
+      '</div>';
+  }
+
+  function renderXiang(chart) {
+    const keys = D.TRIGRAM_ORDER;
+    if (!state.xiangKey) state.xiangKey = chart.yong.key;
+    const tabs = keys.map(function (k) {
+      const t = D.TRIGRAMS[k];
+      return '<button data-xiang="' + k + '" class="' + (k === state.xiangKey ? 'active' : '') + '">' + t.name + '</button>';
+    }).join('');
+    const t = D.TRIGRAMS[state.xiangKey];
+    const xi = X.XIANG[state.xiangKey];
+    const rows = X.CATEGORIES.map(function (c) {
+      return '<tr><th>' + c[1] + '</th><td>' + esc(xi[c[0]] || '—') + '</td></tr>';
+    }).join('');
+    const who = chart.ti.key === state.xiangKey ? '（本卦为体）' : chart.yong.key === state.xiangKey ? '（本卦为用）' : '';
+    return '<div class="xiang-tabs">' + tabs + '</div>' +
+      '<div style="margin-bottom:10px;color:var(--ink-3);font-size:12.5px">' + t.name + '卦' + who +
+      '：' + t.nature + '、' + t.virtue + '，位' + t.direction + '，属' + t.wuxing + '。</div>' +
+      '<table class="xiang-table">' + rows + '</table>';
+  }
+
+  function renderCuo(chart) {
+    const items = [
+      ['错卦', chart.cuo, '六爻尽变，事之反面'],
+      ['综卦', chart.zong, '上下颠倒，换位而观'],
+      ['互卦', chart.hu, '事之中间'],
+      ['变卦', chart.bian, '事之终局']
+    ];
+    return '<div class="cuo-grid">' + items.map(function (it) {
+      return '<div class="cuo-item"><span>' + it[0] + '</span><strong>' + esc(it[1].name) + '</strong>' +
+        '<em>' + esc(it[1].meaning) + '</em><em style="color:var(--ink-4)">' + it[2] + '</em></div>';
+    }).join('') + '</div>' +
+      '<p style="font-size:13px;color:var(--ink-3);line-height:1.9;margin:14px 0 0">' +
+      '错卦看事之反面与对立面，综卦看换位之后的形势；梅花以体用互变为正，错综为辅，遇疑难时可参看。</p>';
+  }
+
+  function renderRules(chart) {
+    const yongKey = chart.yong.key;
+    const topic = state.topic;
+    const rule = Learn.TOPIC_RULES[topic];
+    let html = '<div class="rule-list">';
+    html += '<div class="rule"><b>体用总诀</b><p>' + esc(Learn.TIJONG[0].text) + '</p></div>';
+    html += '<div class="rule"><b>互变之应</b><p>' + esc(Learn.TIJONG[2].text) + '</p></div>';
+    html += '<div class="rule"><b>' + chart.yong.name + '卦' + (chart.relations.tiYong === 'shengTi' ? '生体' : chart.relations.tiYong === 'yongKe' ? '克体' : '与体') + '</b><p>' +
+      esc(chart.relations.tiYong === 'shengTi' ? Learn.SHENG_TI[yongKey] : chart.relations.tiYong === 'yongKe' ? Learn.KE_TI[yongKey] : '体用之间，以生克定吉凶；比和则平顺，体克用则事在掌握。') + '</p></div>';
+    if (rule) {
+      html += '<div class="rule"><b>' + rule.name + '占</b><p>' + esc(rule.basis) + '今「' + esc(E.REL[chart.relations.tiYong].short) + '」，' + esc(rule.byRel[chart.relations.tiYong] || '') + '</p></div>';
+    }
+    html += '<div class="rule"><b>应期</b><p>' + esc(Learn.METHOD_TEXTS[7].text) + '</p></div>';
+    html += '</div>';
+    return html;
+  }
+
+  /* ---------------- 记录 ---------------- */
+
+  function loadHistory() {
+    try {
+      return JSON.parse(localStorage.getItem(STORE_KEY) || '[]');
+    } catch (e) { return []; }
+  }
+
+  function saveHistory(list) {
+    localStorage.setItem(STORE_KEY, JSON.stringify(list.slice(0, 40)));
+  }
+
+  function renderHistory() {
+    const list = loadHistory();
+    const ul = $('#historyList');
+    if (!list.length) {
+      ul.innerHTML = '<li class="empty-line">尚无记录</li>';
+      return;
+    }
+    ul.innerHTML = list.map(function (h, i) {
+      return '<li class="history-item" data-idx="' + i + '">' +
+        '<span class="hi-name">' + esc(h.title) + '</span>' +
+        '<span class="hi-meta">' + esc(h.label) + '</span>' +
+        '<button class="hi-del" title="删除" data-del="' + i + '">×</button>' +
+        '</li>';
+    }).join('');
+  }
+
+  function storeCurrent() {
+    const chart = state.chart;
+    if (!chart) return;
+    const list = loadHistory();
+    const item = {
+      ts: Date.now(),
+      title: chart.ben.name,
+      label: chart.meta.methodName + ' · ' + (chart.meta.lunar ? chart.meta.lunar.monthName + chart.meta.lunar.dayName : ''),
+      method: chart.meta.method,
+      methodName: chart.meta.methodName,
+      upper: chart.upper.key,
+      lower: chart.lower.key,
+      moving: chart.moving,
+      topic: state.topic,
+      motion: state.motion,
+      solar: chart.meta.solar,
+      lunar: chart.meta.lunar,
+      shichenIndex: chart.meta.shichen ? chart.meta.shichen.index : null,
+      timeNum: chart.meta.timeNum,
+      timeUsed: chart.meta.timeUsed,
+      monthBranch: chart.meta.monthJian ? chart.meta.monthJian.branch : null,
+      numbers: chart.meta.numbers,
+      note: chart.meta.note,
+      text: chart.meta.text
+    };
+    list.unshift(item);
+    saveHistory(list);
+    renderHistory();
+    toast('已存入记录');
+  }
+
+  function restoreHistory(idx) {
+    const item = loadHistory()[idx];
+    if (!item) return;
+    const chart = E.buildChart(item.upper, item.lower, item.moving, {
+      method: item.method,
+      methodName: item.methodName,
+      solar: item.solar,
+      lunar: item.lunar,
+      shichen: item.shichenIndex ? L.shichenByIndex(item.shichenIndex) : null,
+      numbers: item.numbers || {},
+      upperNum: D.TRIGRAMS[item.upper].num,
+      lowerNum: D.TRIGRAMS[item.lower].num,
+      timeNum: item.timeNum,
+      timeUsed: item.timeUsed,
+      monthJian: item.monthBranch ? branchMonth(item.monthBranch) : L.monthJian(new Date(item.ts)),
+      note: item.note || '',
+      text: item.text
+    });
+    state.chart = chart;
+    state.topic = item.topic || 'zonghe';
+    state.motion = item.motion || 'zuo';
+    $('#topicSelect').value = state.topic;
+    $('#motionSelect').value = state.motion;
+    state.fromCase = null;
+    reanalyze();
+    renderChart();
+    $('#emptyState').hidden = true;
+    $('#result').hidden = false;
+    switchView('cast');
+    toast('已载入记录');
+  }
+
+  /* ---------------- 卦例 ---------------- */
+
+  function renderCases() {
+    const grid = $('#casesGrid');
+    grid.innerHTML = Learn.CASES.map(function (c, i) {
+      const chart = E.buildChart(c.cast.upper, c.cast.lower, c.cast.moving, {});
+      const chips = [
+        chart.ben.name,
+        '互 ' + chart.huUpper.name + chart.huLower.name,
+        '变 ' + chart.bian.name,
+        E.yaoName(chart.lines, chart.moving) + '动'
+      ].map(t => '<span>' + esc(t) + '</span>').join('');
+      return '<article class="card case-card">' +
+        '<h2>' + esc(c.title) + '</h2>' +
+        '<div class="case-sub">' + esc(c.subtitle) + '</div>' +
+        '<div class="case-cast">' + chips + '</div>' +
+        '<details><summary>原文</summary>' + c.lines.map(p => '<p>' + esc(p) + '</p>').join('') + '</details>' +
+        '<div class="case-verdict">断：' + esc(c.verdict) + '</div>' +
+        '<ul>' + c.analysis.map(a => '<li>' + esc(a) + '</li>').join('') + '</ul>' +
+        '<div class="case-foot"><span class="lesson">' + esc(c.lesson) + '</span>' +
+        '<button class="btn tiny" data-case="' + i + '">复原此卦</button></div>' +
+        '</article>';
+    }).join('');
+  }
+
+  function loadCase(idx) {
+    const c = Learn.CASES[idx];
+    if (!c) return;
+    const cast = c.cast;
+    const chart = E.buildChart(cast.upper, cast.lower, cast.moving, {
+      method: 'case',
+      methodName: '卦例复原',
+      solar: '古例',
+      lunar: null,
+      shichen: cast.timeNum ? L.shichenByIndex(cast.timeNum) : null,
+      numbers: {},
+      upperNum: D.TRIGRAMS[cast.upper].num,
+      lowerNum: D.TRIGRAMS[cast.lower].num,
+      timeNum: cast.timeNum || 0,
+      timeUsed: !!cast.timeUsed,
+      monthJian: cast.monthBranch ? branchMonth(cast.monthBranch) : L.monthJian(new Date()),
+      note: '依原例复原'
+    });
+    state.chart = chart;
+    state.fromCase = c.title;
+    state.topic = guessTopic(c.id);
+    state.detailTab = 'gua';
+    state.xiangKey = null;
+    $('#topicSelect').value = state.topic;
+    reanalyze();
+    renderChart();
+    $('#emptyState').hidden = true;
+    $('#result').hidden = false;
+    switchView('cast');
+    toast('已复原：' + c.title);
+  }
+
+  function guessTopic(id) {
+    return { guanmei: 'zonghe', mudan: 'zonghe', koumen: 'shiwu', dongjing: 'zonghe', laoren: 'jiankang', shaonian: 'ganqing' }[id] || 'zonghe';
+  }
+
+  /* ---------------- 断诀 ---------------- */
+
+  function renderStudy() {
+    const body = $('#studyBody');
+    let html = '';
+
+    html += '<section class="card study-sec"><h2>一 · 起卦</h2>' +
+      '<p class="lead">卦以八除，爻以六除；先得数，再起卦。</p>' +
+      '<div class="grid-2">' +
+      Learn.METHOD_TEXTS.slice(0, 5).map(function (m) {
+        return '<div class="box"><h3>' + esc(m.title) + '</h3><p>' + esc(m.text) + '</p></div>';
+      }).join('') +
+      '</div>' +
+      '<div class="quote-block" style="margin-top:12px"><small>八卦取象歌</small>' + esc(Learn.XIANG_SONG) + '</div>' +
+      '</section>';
+
+    html += '<section class="card study-sec"><h2>二 · 体用</h2>' +
+      '<p class="lead">动者为用，静者为体；体为己身，用为所占之事。</p>' +
+      Learn.TIJONG.map(function (t) {
+        return '<div class="quote-block"><small>' + esc(t.title) + '</small>' + esc(t.text) + '</div>';
+      }).join('') +
+      '<div class="grid-2" style="margin-top:14px">' +
+      '<div class="box"><h3>五行相生</h3><p>' + esc(Learn.SHENGKE.sheng) + '</p></div>' +
+      '<div class="box"><h3>五行相克</h3><p>' + esc(Learn.SHENGKE.ke) + '</p></div>' +
+      '</div></section>';
+
+    html += '<section class="card study-sec"><h2>三 · 八卦生克之应</h2>' +
+      '<p class="lead">用卦生体、克体，各有其事；看是何卦，即知其应。</p>' +
+      '<div class="grid-2">' + D.TRIGRAM_ORDER.map(function (k) {
+        const t = D.TRIGRAMS[k];
+        return '<div class="box"><h3>' + t.name + ' · ' + t.wuxing + '</h3>' +
+          '<p><b style="color:var(--green)">生体：</b>' + esc(Learn.SHENG_TI[k]) + '</p>' +
+          '<p style="margin-top:6px"><b style="color:var(--red)">克体：</b>' + esc(Learn.KE_TI[k]) + '</p></div>';
+      }).join('') + '</div></section>';
+
+    html += '<section class="card study-sec"><h2>四 · 十八占</h2>' +
+      '<p class="lead">原书十八占，以体为主；此择其要者十类，生克一定，吉凶立见。</p>' +
+      '<div class="table-wrap"><table class="data"><thead><tr><th>占类</th><th>用生体</th><th>比和</th><th>体克用</th><th>体生用</th><th>用克体</th></tr></thead><tbody>' +
+      Object.keys(Learn.TOPIC_RULES).map(function (k) {
+        const r = Learn.TOPIC_RULES[k];
+        return '<tr><td class="name">' + esc(r.name) + '</td>' +
+          ['shengTi', 'bihe', 'tiKe', 'tiSheng', 'yongKe'].map(function (rel) {
+            return '<td>' + esc(r.byRel[rel] || '—') + '</td>';
+          }).join('') + '</tr>';
+      }).join('') + '</tbody></table></div></section>';
+
+    html += '<section class="card study-sec"><h2>五 · 卦气旺衰</h2>' +
+      '<p class="lead">得时当令者旺，失时不当令者衰；体宜旺，用宜衰。</p>' +
+      '<div class="quote-block"><small>卦气旺</small>' + esc(Learn.QI.wang) + '</div>' +
+      '<div class="quote-block"><small>卦气衰</small>' + esc(Learn.QI.shuai) + '</div>' +
+      '<div class="table-wrap" style="margin-top:14px"><table class="data"><thead><tr><th>月令</th><th>旺</th><th>相</th><th>休</th><th>囚</th><th>死</th></tr></thead><tbody>' +
+      [['春（寅卯）', '木', '火', '水', '金', '土'],
+       ['夏（巳午）', '火', '土', '木', '水', '金'],
+       ['秋（申酉）', '金', '水', '土', '火', '木'],
+       ['冬（亥子）', '水', '木', '金', '土', '火'],
+       ['四季（辰戌丑未）', '土', '金', '火', '木', '水']].map(function (r) {
+        return '<tr><td class="name">' + r[0] + '</td>' + r.slice(1).map(v => '<td>' + v + '</td>').join('') + '</tr>';
+      }).join('') + '</tbody></table></div></section>';
+
+    html += '<section class="card study-sec"><h2>六 · 三要十应</h2>' +
+      '<p class="lead">体用为内，外应为外；合内外而断，方为心易之全术。</p>' +
+      '<div class="quote-block"><small>三要十应</small>' + esc(Learn.WAIYING.intro) + '</div>' +
+      '<div class="grid-2" style="margin-top:14px">' + Learn.WAIYING.items.map(function (it) {
+        return '<div class="box"><h3>' + esc(it[0]) + '之应</h3><p>' + esc(it[1]) + '</p></div>';
+      }).join('') + '</div>' +
+      '<div class="quote-block" style="margin-top:14px"><small>内外论</small>' + esc(Learn.WAIYING.neiwai) + '</div>' +
+      '<div class="grid-2" style="margin-top:10px">' +
+      '<div class="box"><h3>向背</h3><p>' + esc(Learn.WAIYING.xiangbei) + '</p></div>' +
+      '<div class="box"><h3>动静迟速</h3><p>' + esc(Learn.WAIYING.dongjing) + '</p></div>' +
+      '</div></section>';
+
+    html += '<section class="card study-sec"><h2>七 · 六十四卦</h2>' +
+      '<p class="lead">上卦、下卦相重，得六十四卦；卦序依《周易》通行本，卦辞以《周易》为据。</p>' +
+      '<div class="table-wrap"><table class="data"><thead><tr><th>#</th><th>卦名</th><th>上下</th><th>卦义</th><th>卦辞</th></tr></thead><tbody>' +
+      Object.keys(D.HEX_BY_NUM).map(function (n) {
+        const h = D.HEX_BY_NUM[n];
+        return '<tr><td>' + h.seq + '</td><td class="name">' + esc(h.name) + '</td><td>' + h.upper.name + '/' + h.lower.name +
+          '</td><td>' + esc(h.meaning) + '</td><td>' + esc(h.guaci) + '</td></tr>';
+      }).join('') + '</tbody></table></div></section>';
+
+    body.innerHTML = html;
+  }
+
+  /* ---------------- 分享与打印 ---------------- */
+
+  function buildShareText() {
+    const chart = state.chart;
+    const a = state.analysis;
+    if (!chart || !a) return '';
+    const lines = [];
+    lines.push('【梅花易数】' + chart.ben.name + '　' + E.yaoName(chart.lines, chart.moving) + '动');
+    lines.push('起卦：' + chart.meta.methodName + '　' + chart.meta.solar);
+    if (chart.meta.lunar) lines.push('农历：' + chart.meta.lunar.text);
+    lines.push('本卦 ' + chart.ben.name + '　互卦 ' + chart.hu.name + '　变卦 ' + chart.bian.name);
+    lines.push('体：' + chart.ti.name + chart.ti.wuxing + '　用：' + chart.yong.name + chart.yong.wuxing +
+      '　' + E.REL[chart.relations.tiYong].short + '　卦势：' + a.grade.name);
+    a.sections.forEach(function (s) { lines.push('◇ ' + s.title + '：' + s.text); });
+    lines.push('建议：' + a.advice.join(' '));
+    lines.push('—— 梅花易数排盘');
+    return lines.join('\n');
+  }
+
+  async function copyShare() {
+    const text = buildShareText();
+    if (!text) return;
+    try {
+      await navigator.clipboard.writeText(text);
+      toast('断语已复制');
+    } catch (e) {
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      document.body.appendChild(ta);
+      ta.select();
+      try { document.execCommand('copy'); toast('断语已复制'); } catch (err) { toast('复制失败，请手动选择'); }
+      document.body.removeChild(ta);
+    }
+  }
+
+  /* ---------------- 事件绑定 ---------------- */
+
+  function bind() {
+    $$('#mainNav button, .brand').forEach(function (b) {
+      b.addEventListener('click', function (e) {
+        e.preventDefault();
+        switchView(b.dataset.view);
+      });
+    });
+
+    document.addEventListener('click', function (e) {
+      const t = e.target;
+      const caseBtn = t.closest('[data-case]');
+      if (caseBtn) { loadCase(Number(caseBtn.dataset.case)); return; }
+
+      const xbtn = t.closest('[data-xiang]');
+      if (xbtn) { state.xiangKey = xbtn.dataset.xiang; renderDetail(); return; }
+
+      const tab = t.closest('#detailTabs button');
+      if (tab) { state.detailTab = tab.dataset.tab; renderDetail(); return; }
+
+      const act = t.closest('[data-act]');
+      if (act) {
+        const a = act.dataset.act;
+        if (a === 'copy') copyShare();
+        if (a === 'print') window.print();
+        if (a === 'save') storeCurrent();
+        return;
+      }
+
+      const del = t.closest('[data-del]');
+      if (del) {
+        e.stopPropagation();
+        const list = loadHistory();
+        list.splice(Number(del.dataset.del), 1);
+        saveHistory(list);
+        renderHistory();
+        return;
+      }
+
+      const hi = t.closest('.history-item');
+      if (hi) restoreHistory(Number(hi.dataset.idx));
+    });
+
+    $('#clearHistory').addEventListener('click', function () {
+      if (!loadHistory().length) return;
+      saveHistory([]);
+      renderHistory();
+      toast('记录已清空');
+    });
+  }
+
+  /* ---------------- 今日 ---------------- */
+
+  function renderToday() {
+    const now = new Date();
+    const lunar = L.toLunar(now);
+    const sc = L.shichenOf(now.getHours());
+    const week = ['日', '一', '二', '三', '四', '五', '六'][now.getDay()];
+    $('#todayInfo').innerHTML = now.getFullYear() + '年' + (now.getMonth() + 1) + '月' + now.getDate() + '日 周' + week +
+      '<br>' + (lunar ? lunar.text : '') + '　' + sc.name;
+  }
+
+  /* ---------------- 启动 ---------------- */
+
+  function registerServiceWorker() {
+    if (!('serviceWorker' in navigator)) return;
+    if (!/^https?:$/.test(location.protocol)) return;
+    window.addEventListener('load', function () {
+      navigator.serviceWorker.register('./sw.js').catch(function () { /* 离线缓存失败不影响使用 */ });
+    });
+  }
+
+  function init() {
+    initForm();
+    bind();
+    renderToday();
+    renderHistory();
+    renderCases();
+    renderStudy();
+    updateTimeHint();
+    registerServiceWorker();
+    const hash = location.hash.replace('#', '');
+    if (['cast', 'cases', 'study', 'about'].indexOf(hash) >= 0) switchView(hash);
+
+    // 便于分享与调试：?gua=dui-li-1 直接排卦；?cast=1 以当前时刻起卦
+    const params = new URLSearchParams(location.search);
+    if (params.get('topic')) {
+      state.topic = params.get('topic');
+      $('#topicSelect').value = state.topic;
+    }
+    if (params.get('tab')) state.detailTab = params.get('tab');
+    const caseId = params.get('case');
+    const gua = params.get('gua');
+    if (gua) {
+      const parts = gua.split('-');
+      if (parts.length === 3 && D.TRIGRAMS[parts[0]] && D.TRIGRAMS[parts[1]]) {
+        state.method = 'manual';
+        $$('#methodTabs button').forEach(x => x.classList.toggle('active', x.dataset.method === 'manual'));
+        $$('.pane').forEach(p => p.classList.toggle('active', p.dataset.pane === 'manual'));
+        $('#manUpper').value = parts[0];
+        $('#manLower').value = parts[1];
+        $('#manMoving').value = String(Math.min(6, Math.max(1, parseInt(parts[2], 10) || 1)));
+        cast(true);
+      }
+    } else if (params.get('cast') === '1') {
+      cast(true);
+    } else if (caseId !== null && caseId !== '') {
+      loadCase(Number(caseId));
+    }
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,25 @@
+{
+  "name": "梅花易数 · 排盘断卦",
+  "short_name": "梅花易数",
+  "description": "依《增广校正梅花易数》制作的排盘断卦工具，离线可用。",
+  "lang": "zh-CN",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f3ede0",
+  "theme_color": "#982a20",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}

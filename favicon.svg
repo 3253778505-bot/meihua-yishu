@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <rect width="64" height="64" rx="12" fill="#982a20"/>
+  <rect x="5" y="5" width="54" height="54" rx="8" fill="none" stroke="#fdf8ee" stroke-width="1.5" opacity=".75"/>
+  <text x="32" y="45" text-anchor="middle" font-family="KaiTi, STKaiti, serif" font-size="38" fill="#fdf8ee">梅</text>
+</svg>
